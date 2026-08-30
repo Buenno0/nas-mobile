@@ -25,13 +25,26 @@ struct RootView: View {
         }
       }
 
-      AppearanceToggle()
-        .padding(.top, 8)
-        .padding(.trailing, 16)
+      if showsFloatingAppearanceToggle {
+        AppearanceToggle()
+          .padding(.top, 8)
+          .padding(.trailing, 16)
+          .transition(.opacity.combined(with: .scale(scale: 0.9)))
+      }
     }
     .tint(.ozAccent)
     .foregroundStyle(Color.ozInk)
     .background(Color.ozBackground.ignoresSafeArea())
+  }
+
+  /// Só nas telas sem barra de navegação. Dentro do app autenticado este botão
+  /// flutuante cairia exatamente sobre os itens `.topBarTrailing` (Ordenar,
+  /// Opções) e roubaria o toque deles; lá o controle mora no Perfil.
+  private var showsFloatingAppearanceToggle: Bool {
+    switch store.phase {
+    case .signedOut, .restoreFailed: true
+    case .restoring, .authenticated, .passwordChangeRequired: false
+    }
   }
 
   private var restoringView: some View {

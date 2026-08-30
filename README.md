@@ -31,7 +31,13 @@ DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer \
   xcodebuild test \
   -project Ozymandias.xcodeproj \
   -scheme Ozymandias \
-  -destination 'platform=iOS Simulator,name=iPhone 17'
+  -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -derivedDataPath /tmp/ozymandias-dd
 ```
+
+O `-derivedDataPath` fora do repositório é necessário: este projeto fica em uma
+pasta sincronizada, e os bundles construídos ali herdam atributos estendidos
+(`com.apple.FinderInfo`) que fazem o `codesign` falhar com “resource fork,
+Finder information, or similar detritus not allowed”.
 
 Os testes de interface usam respostas locais determinísticas quando o app recebe `--ui-testing`; o app normal sempre usa `URLSession` e o Keychain reais.
