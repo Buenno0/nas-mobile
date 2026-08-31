@@ -24,9 +24,10 @@ class OzymandiasRepository(private val capabilities: PlaybackCapabilities) {
   suspend fun me(credential: Credential): User = ApiClient(credential.serverUrl).get("/api/auth/me", credential.token)
   suspend fun home(credential: Credential): HomeResponse = ApiClient(credential.serverUrl).get("/api/home", credential.token)
   suspend fun libraries(credential: Credential): List<Library> = ApiClient(credential.serverUrl).get("/api/libraries", credential.token)
-  suspend fun titles(credential: Credential, offset: Int = 0, query: String = ""): TitlesPage {
+  suspend fun titles(credential: Credential, offset: Int = 0, query: String = "", kind: TitleKind? = null): TitlesPage {
     val path = "/api/titles?sort=recent&limit=60&offset=$offset" +
-      if (query.isBlank()) "" else "&q=${ApiClient.encoded(query)}"
+      (if (query.isBlank()) "" else "&q=${ApiClient.encoded(query)}") +
+      (kind?.let { "&kind=${if (it == TitleKind.MOVIE) "movie" else "tv"}" } ?: "")
     return ApiClient(credential.serverUrl).get(path, credential.token)
   }
   suspend fun title(credential: Credential, id: Long): TitleDetail = ApiClient(credential.serverUrl).get("/api/titles/$id", credential.token)

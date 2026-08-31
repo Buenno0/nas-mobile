@@ -79,6 +79,12 @@ struct APIClient: Sendable {
     let _: LogoutResponse = try await send(path: "/api/auth/logout", method: "POST", bearer: token)
   }
 
+  func approveDevice(userCode: String, token: String) async throws -> DeviceApprovalResponse {
+    try await send(
+      path: "/api/auth/device/approve", method: "POST", bearer: token,
+      body: DeviceApprovalRequest(userCode: userCode))
+  }
+
   func home(token: String) async throws -> HomeResponse {
     try await send(path: "/api/home", bearer: token)
   }

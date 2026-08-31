@@ -36,6 +36,11 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
@@ -76,12 +81,14 @@ fun TvPlayerScreen(
   var durationMs by remember(source.url) { mutableLongStateOf((source.file.duration * 1_000).toLong()) }
   var isPlaying by remember { mutableStateOf(true) }
   var controlsVisible by remember { mutableStateOf(true) }
+  var interactionTick by remember { mutableIntStateOf(0) }
   var error by remember { mutableStateOf<String?>(null) }
   var audioIndex by remember { mutableIntStateOf(source.tracks.audio.indexOfFirst { it.isDefault }.coerceAtLeast(0)) }
   var subtitleIndex by remember { mutableIntStateOf(-1) }
   var speedIndex by remember { mutableIntStateOf(1) }
   val speeds = remember { listOf(.75f, 1f, 1.25f, 1.5f, 2f) }
   val primaryFocus = remember { FocusRequester() }
+  val playerFocus = remember { FocusRequester() }
 
   fun persist(player: Player?) {
     val position = player?.currentPosition ?: positionMs
@@ -170,17 +177,46 @@ fun TvPlayerScreen(
     }
   }
 
-  LaunchedEffect(Unit) { primaryFocus.requestFocus() }
+  LaunchedEffect(controlsVisible, interactionTick) {
+    if (controlsVisible) primaryFocus.requestFocus() else playerFocus.requestFocus()
+  }
+
+  LaunchedEffect(controlsVisible, isPlaying, interactionTick) {
+    if (controlsVisible && isPlaying) {
+      delay(4_000)
+      controlsVisible = false
+    }
+  }
 
   BackHandler {
-    if (controlsVisible.not()) controlsVisible = true
-    else {
+    if (controlsVisible) {
+      controlsVisible = false
+    } else {
       release(save = true)
       close()
     }
   }
 
-  Box(Modifier.fillMaxSize().background(Color.Black).clickable { controlsVisible = !controlsVisible }) {
+  Box(
+    Modifier.fillMaxSize().background(Color.Black)
+      .focusRequester(playerFocus).focusable()
+      .onPreviewKeyEvent { event ->
+        if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+        // Let BackHandler distinguish “hide controls” from “leave player”.
+        if (event.key == Key.Back) return@onPreviewKeyEvent false
+        interactionTick++
+        if (!controlsVisible) {
+          controlsVisible = true
+          true
+        } else {
+          false
+        }
+      }
+      .clickable {
+        interactionTick++
+        controlsVisible = !controlsVisible
+      },
+  ) {
     runtime?.player?.let { player ->
       AndroidView(
         factory = { viewContext ->
@@ -198,11 +234,16 @@ fun TvPlayerScreen(
     if (controlsVisible) {
       Column(
         Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-          .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = .94f))))
-          .padding(horizontal = 56.dp, vertical = 34.dp),
+          .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = .72f), Color.Black.copy(alpha = .96f))))
+          .padding(horizontal = 64.dp, vertical = 38.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
       ) {
-        Text(source.title, color = Color.White, fontSize = 25.sp)
+        Text(
+          source.title,
+          color = Color.White,
+          fontSize = 27.sp,
+          fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+        )
         LinearProgressIndicator(
           progress = { if (durationMs > 0) (positionMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f },
           modifier = Modifier.fillMaxWidth().height(7.dp),
@@ -255,12 +296,17 @@ fun TvPlayerScreen(
 private fun PlayerButton(label: String, modifier: Modifier = Modifier, action: () -> Unit) {
   var focused by remember { mutableStateOf(false) }
   Box(
-    modifier.background(if (focused) Accent else Color.White.copy(alpha = .14f), RoundedCornerShape(9.dp))
-      .border(2.dp, if (focused) Color.White else Color.Transparent, RoundedCornerShape(9.dp))
-      .onFocusChanged { focused = it.isFocused }.focusable().clickable(onClick = action)
-      .padding(horizontal = 15.dp, vertical = 11.dp),
+    modifier.background(if (focused) Color.White else Color.Black.copy(alpha = .48f), RoundedCornerShape(50))
+      .border(1.dp, if (focused) Color.White else Color.White.copy(alpha = .28f), RoundedCornerShape(50))
+      .onFocusChanged { focused = it.isFocused }.ozyClickable(onClick = action)
+      .padding(horizontal = 17.dp, vertical = 11.dp),
   ) {
-    Text(label, color = if (focused) Color.Black else Color.White, fontSize = 14.sp)
+    Text(
+      label,
+      color = if (focused) Color.Black else Color.White,
+      fontSize = 14.sp,
+      fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+    )
   }
 }
 

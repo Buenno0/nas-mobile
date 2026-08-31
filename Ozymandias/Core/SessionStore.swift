@@ -563,6 +563,17 @@ final class SessionStore {
     }
   }
 
+  func approveTV(code: String, for session: AuthenticatedSession) async throws -> String {
+    guard let normalized = TVPairingCode.extract(from: code) else {
+      throw APIClientError.server(status: 400, message: "O QR Code ou código da TV não é válido.")
+    }
+    let response = try await authenticatedContentRequest {
+      try await client(for: session.credential.serverURL)
+        .approveDevice(userCode: normalized, token: session.credential.token)
+    }
+    return response.deviceName
+  }
+
   func logout() async {
     guard !isLoggingOut else { return }
     isLoggingOut = true

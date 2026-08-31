@@ -63,6 +63,33 @@ struct APIClientTests {
     }
   }
 
+  @Test func approvesTVUsingBearerAndHumanCode() async throws {
+    let recorder = RequestRecorder()
+    let session = MockHTTPSession { request in
+      await recorder.record(request)
+      return Self.response(
+        for: request, status: 200,
+        json: #"{"ok":true,"device_name":"Fire TV da sala"}"#)
+    }
+    let response = try await APIClient(baseURL: baseURL, session: session)
+      .approveDevice(userCode: "ABCD-EFGH", token: "session-token")
+    #expect(response.deviceName == "Fire TV da sala")
+    let request = await recorder.request
+    #expect(request?.url?.path == "/api/auth/device/approve")
+    #expect(request?.value(forHTTPHeaderField: "Authorization") == "Bearer session-token")
+    let body = try #require(request?.httpBody)
+    let json = try #require(JSONSerialization.jsonObject(with: body) as? [String: String])
+    #expect(json["user_code"] == "ABCD-EFGH")
+  }
+
+  @Test func extractsTVCodeFromQRCodeURL() {
+    #expect(
+      TVPairingCode.extract(from: "http://ozymandias.local:8787/conectar?codigo=ABCD-EFGH")
+        == "ABCD-EFGH")
+    #expect(TVPairingCode.extract(from: "abcdefgh") == "ABCD-EFGH")
+    #expect(TVPairingCode.extract(from: "codigo-invalido") == nil)
+  }
+
   @Test func mapsTimeoutToFriendlyMessage() async {
     let session = MockHTTPSession { _ in throw URLError(.timedOut) }
     await #expect(throws: APIClientError.self) {

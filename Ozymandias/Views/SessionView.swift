@@ -151,6 +151,26 @@ private struct ProfileView: View {
         .accessibilityIdentifier("serverDashboardButton")
 
         NavigationLink {
+          TVPairingView(store: store, session: session)
+        } label: {
+          HStack(spacing: 12) {
+            Image(systemName: "qrcode.viewfinder").foregroundStyle(Color.ozAccent)
+            VStack(alignment: .leading, spacing: 3) {
+              Text("Conectar uma TV").font(.headline)
+              Text("Escaneie o QR Code mostrado no Fire TV")
+                .font(.caption)
+                .foregroundStyle(Color.ozMuted)
+            }
+            Spacer()
+            Image(systemName: "chevron.right").foregroundStyle(Color.ozMuted)
+          }
+          .padding(16)
+          .ozyCard()
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("pairTVButton")
+
+        NavigationLink {
           ServerSettingsView(store: store, session: session)
         } label: {
           HStack(spacing: 12) {

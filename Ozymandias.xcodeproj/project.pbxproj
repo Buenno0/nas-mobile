@@ -34,6 +34,7 @@
 		A1000000000000000000001A /* ArtworkCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000001A /* ArtworkCache.swift */; };
 		A1000000000000000000001B /* PlaybackPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000001B /* PlaybackPlanner.swift */; };
 		A1000000000000000000001C /* HeroBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000001C /* HeroBanner.swift */; };
+		A1000000000000000000001D /* TVPairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000001D /* TVPairingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,6 +83,7 @@
 		A2000000000000000000001A /* ArtworkCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkCache.swift; sourceTree = "<group>"; };
 		A2000000000000000000001B /* PlaybackPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackPlanner.swift; sourceTree = "<group>"; };
 		A2000000000000000000001C /* HeroBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroBanner.swift; sourceTree = "<group>"; };
+		A2000000000000000000001D /* TVPairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVPairingView.swift; sourceTree = "<group>"; };
 		A20000000000000000000021 /* Ozymandias.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ozymandias.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20000000000000000000022 /* OzymandiasTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OzymandiasTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20000000000000000000023 /* OzymandiasUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OzymandiasUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -201,6 +203,7 @@
 				A20000000000000000000017 /* SettingsAndMatchViews.swift */,
 				A20000000000000000000019 /* ArtistsView.swift */,
 				A2000000000000000000001C /* HeroBanner.swift */,
+				A2000000000000000000001D /* TVPairingView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -356,6 +359,7 @@
 				A1000000000000000000001A /* ArtworkCache.swift in Sources */,
 				A1000000000000000000001B /* PlaybackPlanner.swift in Sources */,
 				A1000000000000000000001C /* HeroBanner.swift in Sources */,
+				A1000000000000000000001D /* TVPairingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

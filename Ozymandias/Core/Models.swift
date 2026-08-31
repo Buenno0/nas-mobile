@@ -40,6 +40,42 @@ struct LogoutResponse: Codable, Equatable, Sendable {
   let ok: Bool
 }
 
+struct DeviceApprovalRequest: Codable, Equatable, Sendable {
+  let userCode: String
+
+  enum CodingKeys: String, CodingKey { case userCode = "user_code" }
+}
+
+struct DeviceApprovalResponse: Codable, Equatable, Sendable {
+  let ok: Bool
+  let deviceName: String
+
+  enum CodingKeys: String, CodingKey {
+    case ok
+    case deviceName = "device_name"
+  }
+}
+
+enum TVPairingCode {
+  static func extract(from value: String) -> String? {
+    let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+    if let components = URLComponents(string: trimmed),
+      let queryCode = components.queryItems?.first(where: { $0.name == "codigo" })?.value
+    {
+      return normalize(queryCode)
+    }
+    return normalize(trimmed)
+  }
+
+  static func normalize(_ value: String) -> String? {
+    let allowed = Set("ABCDEFGHJKLMNPQRSTUVWXYZ23456789")
+    let compact = value.uppercased().filter { !$0.isWhitespace && $0 != "-" }
+    guard compact.count == 8, compact.allSatisfy({ allowed.contains($0) }) else { return nil }
+    let middle = compact.index(compact.startIndex, offsetBy: 4)
+    return String(compact[..<middle]) + "-" + String(compact[middle...])
+  }
+}
+
 struct SessionCredential: Codable, Equatable, Sendable {
   let serverURL: URL
   let token: String

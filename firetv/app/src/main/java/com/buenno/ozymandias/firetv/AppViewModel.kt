@@ -29,6 +29,14 @@ import kotlinx.coroutines.launch
 
 enum class MainTab { HOME, CATALOG, ACCOUNT }
 
+data class BrowseMemory(
+  val homeShelf: Int = -1,
+  val homeItem: Int = -1,
+  val homeScroll: Int = 0,
+  val catalogItem: Int = -1,
+  val catalogScroll: Int = 0,
+)
+
 sealed interface AppScreen {
   data object Restoring : AppScreen
   data object Servers : AppScreen
@@ -47,8 +55,10 @@ data class AppUiState(
   val catalogTotal: Int = 0,
   val recentServers: List<String> = emptyList(),
   val loading: Boolean = false,
+  val catalogLoadingMore: Boolean = false,
   val preparation: PreparationProgress? = null,
   val error: String? = null,
+  val browseMemory: BrowseMemory = BrowseMemory(),
 )
 
 class AppViewModel(
@@ -61,6 +71,7 @@ class AppViewModel(
   val discoveredServers: StateFlow<List<ServerCandidate>> = discovery.servers()
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
   private var pairingJob: Job? = null
+  private var lastMainTab = MainTab.HOME
 
   init { restore() }
 
@@ -134,8 +145,21 @@ class AppViewModel(
   }
 
   fun selectTab(tab: MainTab) {
+    lastMainTab = tab
     _ui.value = _ui.value.copy(screen = AppScreen.Main(tab), error = null)
     if (tab == MainTab.CATALOG && _ui.value.catalog.isEmpty()) loadCatalog()
+  }
+
+  fun rememberHomeFocus(shelf: Int, item: Int, scroll: Int) {
+    _ui.value = _ui.value.copy(
+      browseMemory = _ui.value.browseMemory.copy(homeShelf = shelf, homeItem = item, homeScroll = scroll),
+    )
+  }
+
+  fun rememberCatalogFocus(item: Int, scroll: Int) {
+    _ui.value = _ui.value.copy(
+      browseMemory = _ui.value.browseMemory.copy(catalogItem = item, catalogScroll = scroll),
+    )
   }
 
   fun loadHome() = viewModelScope.launch {
@@ -154,21 +178,38 @@ class AppViewModel(
       }
   }
 
-  fun loadCatalog(query: String = "", reset: Boolean = true) = viewModelScope.launch {
+  fun loadCatalog(query: String = "", kind: TitleKind? = null, reset: Boolean = true) = viewModelScope.launch {
     val credential = _ui.value.credential ?: return@launch
+    if (!reset && _ui.value.catalogLoadingMore) return@launch
     val offset = if (reset) 0 else _ui.value.catalog.size
-    _ui.value = _ui.value.copy(loading = true, error = null)
-    runCatching { repository.titles(credential, offset, query) }
+    _ui.value = _ui.value.copy(loading = reset, catalogLoadingMore = !reset, error = null)
+    runCatching { repository.titles(credential, offset, query, kind) }
       .onSuccess { page ->
         val items = page.items.filter { it.kind == TitleKind.MOVIE || it.kind == TitleKind.TV }
         _ui.value = _ui.value.copy(
           catalog = if (reset) items else (_ui.value.catalog + items).distinctBy { it.id },
-          catalogTotal = page.total, loading = false,
+          catalogTotal = page.total, loading = false, catalogLoadingMore = false,
         )
       }
       .onFailure {
-        if (!invalidateSession(it)) _ui.value = _ui.value.copy(loading = false, error = it.message)
+        if (!invalidateSession(it)) _ui.value = _ui.value.copy(loading = false, catalogLoadingMore = false, error = it.message)
       }
+  }
+
+  fun playTitle(id: Long) = viewModelScope.launch {
+    val credential = _ui.value.credential ?: return@launch
+    _ui.value = _ui.value.copy(loading = true, preparation = null, error = null)
+    runCatching {
+      val title = repository.title(credential, id)
+      val file = title.preferredFile() ?: error("Este título ainda não possui um arquivo reproduzível.")
+      repository.playback(credential, file, title.name) { progress ->
+        _ui.value = _ui.value.copy(preparation = progress)
+      }
+    }.onSuccess {
+      _ui.value = _ui.value.copy(screen = AppScreen.Player(it), loading = false, preparation = null)
+    }.onFailure {
+      if (!invalidateSession(it)) _ui.value = _ui.value.copy(loading = false, preparation = null, error = it.message)
+    }
   }
 
   fun openTitle(id: Long) = viewModelScope.launch {
@@ -223,13 +264,13 @@ class AppViewModel(
 
   fun closePlayer() {
     val source = (_ui.value.screen as? AppScreen.Player)?.source
-    _ui.value = _ui.value.copy(screen = AppScreen.Main(), error = null)
+    _ui.value = _ui.value.copy(screen = AppScreen.Main(lastMainTab), error = null)
     if (source != null) loadHome()
   }
 
   fun back() {
     _ui.value = when (_ui.value.screen) {
-      is AppScreen.Detail -> _ui.value.copy(screen = AppScreen.Main())
+      is AppScreen.Detail -> _ui.value.copy(screen = AppScreen.Main(lastMainTab))
       is AppScreen.Login, is AppScreen.Pairing -> _ui.value.copy(screen = AppScreen.Servers, error = null)
       else -> _ui.value
     }
@@ -242,6 +283,8 @@ class AppViewModel(
     _ui.value = AppUiState(screen = AppScreen.Servers, recentServers = vault.recentServers())
     credential?.let { repository.logout(it) }
   }
+
+  fun changeServer() = logout()
 
   private suspend fun invalidateSession(error: Throwable): Boolean {
     if (error !is ApiException || error.status != 401) return false

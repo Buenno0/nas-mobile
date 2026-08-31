@@ -13,6 +13,9 @@ val Ink = Color(0xFFF4EFE4)
 val Muted = Color(0xFFA99A84)
 val Accent = Color(0xFFD29A44)
 val Danger = Color(0xFFE08163)
+val AccentInk = Color(0xFF1A1206)
+val Okay = Color(0xFF7FB79A)
+val Warning = Color(0xFFDCA84A)
 
 @Composable
 fun OzymandiasTheme(content: @Composable () -> Unit) {

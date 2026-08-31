@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
@@ -57,8 +59,8 @@ class AuthenticationFlowTest {
     compose.onNodeWithText("Usuário").performTextInput("bueno")
     compose.onNodeWithText("Senha").performTextInput("12345678")
     compose.onNodeWithText("Entrar").performClick()
-    compose.waitUntil(5_000) { compose.onAllNodesWithText("Conta").fetchSemanticsNodes().isNotEmpty() }
-    compose.onNodeWithText("Conta").performClick()
+    compose.waitUntil(5_000) { compose.onAllNodesWithContentDescription("Conta").fetchSemanticsNodes().isNotEmpty() }
+    compose.onNodeWithContentDescription("Conta").performClick()
     compose.onNodeWithText("bueno").assertIsDisplayed()
     compose.onNodeWithText("Sair").performClick()
     compose.onNodeWithText("Escolha seu servidor").assertIsDisplayed()
