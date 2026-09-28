@@ -31,6 +31,10 @@ struct HomeView: View {
         .padding(.trailing, 16)
         .padding(.top, 4)
     }
+    .overlay(alignment: .top) {
+      VoltarParaSalaBanner(store: store, session: session)
+        .padding(.top, 56)
+    }
     .task { await store.loadHome(for: session) }
     .accessibilityIdentifier("homeScreen")
   }

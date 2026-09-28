@@ -208,15 +208,19 @@ final class PlaybackController {
   // MARK: - Transporte
 
   func togglePlayback() {
+    // Modo cinema: vale também para a tela de bloqueio e os fones.
+    guard !sala.soAssiste else { return }
     if isPlaying { pause() } else { play() }
   }
 
   private func play() {
+    guard !sala.soAssiste else { return }
     player.playImmediately(atRate: playbackRate)
     sala.usuarioTocou(em: currentTime)
   }
 
   private func pause() {
+    guard !sala.soAssiste else { return }
     player.pause()
     sala.usuarioPausou(em: player.currentTime().seconds)
   }
@@ -245,6 +249,7 @@ final class PlaybackController {
   func seek(by delta: Double) { seek(to: currentTime + delta) }
 
   func seek(to target: Double) {
+    guard !sala.soAssiste else { return }
     let bounded = min(max(target, 0), max(duration, 0))
     currentTime = bounded
     sala.usuarioPulou(para: bounded)

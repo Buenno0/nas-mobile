@@ -72,7 +72,9 @@ struct SessionView: View {
     .alert(
       "A sala foi encerrada",
       isPresented: Binding(
-        get: { playback.sala.encerradaPor != nil },
+        // Com o player aberto, quem mostra o aviso é ele: um alerta aqui
+        // ficaria escondido atrás do fullScreenCover.
+        get: { playback.sala.encerradaPor != nil && !playback.isPresentingFullScreen },
         set: { if !$0 { playback.sala.encerradaPor = nil } })
     ) {
       Button("Continuar sozinho") { playback.sala.encerradaPor = nil }

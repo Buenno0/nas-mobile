@@ -16,18 +16,31 @@ struct RoomState: Codable, Equatable, Sendable {
   let seq: Int64?
   let presenca: [String]
   let aguardando: [String]?
+  var soDono: Bool? = nil
 
   enum CodingKeys: String, CodingKey {
     case codigo, tocando, posicao, em, por, dono, cliente, seq, presenca, aguardando
     case fileID = "file_id"
+    case soDono = "so_dono"
   }
 
   func with(tocando: Bool? = nil, posicao: Double? = nil, em: Int64) -> RoomState {
     RoomState(
       codigo: codigo, fileID: fileID, tocando: tocando ?? self.tocando,
       posicao: posicao ?? self.posicao, em: em, por: por, dono: dono, cliente: cliente,
-      seq: seq, presenca: presenca, aguardando: aguardando)
+      seq: seq, presenca: presenca, aguardando: aguardando, soDono: soDono)
   }
+}
+
+struct RoomChatLine: Codable, Equatable, Sendable {
+  let de: String
+  let texto: String
+  let em: Int64
+}
+
+struct RoomConnection: Codable, Equatable, Sendable {
+  let dif: Double
+  let travado: Bool
 }
 
 struct RoomMessage: Codable, Sendable {
@@ -35,6 +48,9 @@ struct RoomMessage: Codable, Sendable {
   let estado: RoomState?
   let de: String?
   let emoji: String?
+  let linha: RoomChatLine?
+  let chat: [RoomChatLine]?
+  let conexao: RoomConnection?
   let agora: Int64
 }
 
@@ -45,10 +61,15 @@ struct RoomCommand: Codable, Sendable {
   var emoji: String? = nil
   var cliente: String? = nil
   var seq: Int64? = nil
+  var texto: String? = nil
+  var soDono: Bool? = nil
+  var dif: Double? = nil
+  var travado: Bool? = nil
 
   enum CodingKeys: String, CodingKey {
-    case tipo, posicao, emoji, cliente, seq
+    case tipo, posicao, emoji, cliente, seq, texto, dif, travado
     case fileID = "file_id"
+    case soDono = "so_dono"
   }
 }
 
@@ -93,6 +114,17 @@ final class SalaController {
   private(set) var reacoes: [Reacao] = []
   private(set) var avisos: [Aviso] = []
   private(set) var erro: String?
+  private(set) var chat: [RoomChatLine] = []
+  /// Mensagens que chegaram com o chat fechado.
+  private(set) var naoLidas = 0
+  var chatAberto = false {
+    didSet { if chatAberto { naoLidas = 0 } }
+  }
+  /// Como cada um está (diferença para a sala, travado), com a hora em que
+  /// chegou a notícia: sem notícia há um tempo, o pontinho fica cinza.
+  private(set) var conexoes: [String: (conexao: RoomConnection, em: Date)] = [:]
+  private var avisouSoDono = Date.distantPast
+  private var statusTask: Task<Void, Never>?
   /// Quem encerrou a sala, para o aviso de fim.
   var encerradaPor: String?
   /// Abre a folha de convite (logo depois de criar a sala, ou pelo botão).
@@ -100,6 +132,16 @@ final class SalaController {
 
   var ativa: Bool { codigo != nil }
   var souDono: Bool { estado.map { $0.dono == session?.user.username } ?? false }
+  var eu: String? { session?.user.username }
+  var modoCinema: Bool { estado?.soDono == true }
+  /// Convidado no modo cinema: só assiste. O player nem mostra os controles.
+  var soAssiste: Bool { ativa && modoCinema && !souDono }
+
+  /// Milissegundos até o play combinado (a contagem "3, 2, 1").
+  var faltaParaComecar: Int64 {
+    guard let e = estado, e.tocando else { return 0 }
+    return max(0, e.em - agoraServidor)
+  }
 
   weak var playback: PlaybackController?
 
@@ -150,6 +192,12 @@ final class SalaController {
   }
 
   func sair() {
+    statusTask?.cancel()
+    statusTask = nil
+    chat = []
+    naoLidas = 0
+    chatAberto = false
+    conexoes = [:]
     eventosTask?.cancel()
     relogioTask?.cancel()
     puloTask?.cancel()
@@ -170,12 +218,36 @@ final class SalaController {
     if let playback, playback.player.rate != 0 { playback.player.rate = playback.playbackRate }
   }
 
-  func encerrar() {
-    enviar(RoomCommand(tipo: "encerrar"))
-    sair()
+  /// Espera o servidor confirmar antes de sair: se o pedido falhasse depois
+  /// de já ter saído, a sala seguiria aberta para os outros sem ninguém saber.
+  func encerrar() async {
+    guard let codigo, let store, let session else { return }
+    do {
+      try await store.sendRoomCommand(RoomCommand(tipo: "encerrar"), code: codigo, for: session)
+      sairDeProposito()
+    } catch {
+      erro = "Não foi possível encerrar a sala: \(error.localizedDescription)"
+    }
   }
 
   func reagir(_ emoji: String) { enviar(RoomCommand(tipo: "reacao", emoji: emoji)) }
+
+  func falar(_ texto: String) {
+    let t = texto.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !t.isEmpty else { return }
+    enviar(RoomCommand(tipo: "chat", texto: String(t.prefix(300))))
+  }
+
+  func alternarModoCinema() {
+    guard souDono else { return }
+    enviar(RoomCommand(tipo: "modo", soDono: !modoCinema))
+  }
+
+  /// Sair de propósito (botão ou encerrar): não oferece voltar depois.
+  func sairDeProposito() {
+    UltimaSala.esquecer()
+    sair()
+  }
 
   /// Link para colar numa conversa: o do site abre no navegador, o do app
   /// abre direto aqui.
@@ -199,6 +271,13 @@ final class SalaController {
       while !Task.isCancelled {
         alinhar()
         try? await Task.sleep(for: .seconds(1))
+      }
+    }
+    // Conta aos outros como estamos: o pontinho verde/amarelo/vermelho.
+    statusTask = Task {
+      while !Task.isCancelled {
+        try? await Task.sleep(for: .seconds(5))
+        informarConexao()
       }
     }
   }
@@ -235,7 +314,16 @@ final class SalaController {
     switch m.tipo {
     case "fim":
       encerradaPor = m.de ?? "Quem abriu a sala"
-      sair()
+      sairDeProposito()
+    case "chat":
+      guard let linha = m.linha else { return }
+      chat = Array((chat + [linha]).suffix(100))
+      if !chatAberto, linha.de != eu { naoLidas += 1 }
+    case "historico":
+      chat = m.chat ?? []
+    case "conexao":
+      guard let de = m.de, let c = m.conexao else { return }
+      conexoes[de] = (c, Date())
     case "reacao":
       guard let de = m.de, let emoji = m.emoji else { return }
       let r = Reacao(de: de, emoji: emoji)
@@ -246,6 +334,7 @@ final class SalaController {
       }
     case "estado":
       guard let novo = m.estado else { return }
+      UltimaSala.lembrar(codigo: novo.codigo, fileID: novo.fileID)
       if estado?.fileID != novo.fileID {
         sincronizado = false
         if let playback, playback.currentFile?.id != novo.fileID {
@@ -260,7 +349,7 @@ final class SalaController {
           codigo: novo.codigo, fileID: novo.fileID, tocando: atual.tocando,
           posicao: atual.posicao, em: atual.em, por: novo.por, dono: novo.dono,
           cliente: novo.cliente, seq: novo.seq, presenca: novo.presenca,
-          aguardando: novo.aguardando)
+          aguardando: novo.aguardando, soDono: novo.soDono)
       } else {
         estado = novo
       }
@@ -333,10 +422,12 @@ final class SalaController {
     let onde = alvo()
     let dif = onde - agora
     let tocando = player.timeControlStatus != .paused
+    // Contagem regressiva: a sala já "toca", mas só a partir de `em`.
+    let emContagem = e.tocando && agoraServidor < e.em
 
-    if abs(dif) < 1, tocando == e.tocando { sincronizado = true }
+    if abs(dif) < 1, tocando == e.tocando || emContagem { sincronizado = true }
 
-    if !e.tocando {
+    if !e.tocando || emContagem {
       // A sala espera por nós (depois de um pulo, ou travados): avisa quando
       // der para tocar do ponto novo sem engasgar.
       let eu = session?.user.username ?? ""
@@ -377,21 +468,41 @@ final class SalaController {
     estado = estado?.with(tocando: tocando, posicao: posicao, em: agoraServidor)
   }
 
+  /// Modo cinema: o gesto do convidado não vale, e o alinhamento o desfaz.
+  private func bloqueadoPeloDono() -> Bool {
+    guard modoCinema, !souDono else { return false }
+    if Date().timeIntervalSince(avisouSoDono) > 4 {
+      avisouSoDono = Date()
+      avisar("Modo cinema: só \(estado?.dono ?? "o anfitrião") controla o vídeo")
+    }
+    alinhar()
+    return true
+  }
+
+  private func informarConexao() {
+    guard let playback, let e = estado, playback.phase == .ready else { return }
+    let agora = playback.player.currentTime().seconds
+    guard agora.isFinite else { return }
+    let dif = (alvo() - agora) * 100
+    let travado = e.tocando && playback.player.timeControlStatus == .waitingToPlayAtSpecifiedRate
+    enviar(RoomCommand(tipo: "conexao", dif: dif.rounded() / 100, travado: travado))
+  }
+
   func usuarioTocou(em posicao: Double) {
-    guard ativa, sincronizado, estado?.tocando == false else { return }
+    guard ativa, sincronizado, !bloqueadoPeloDono(), estado?.tocando == false else { return }
     assumir(tocando: true, posicao: posicao)
     enviar(RoomCommand(tipo: "play", posicao: posicao))
   }
 
   func usuarioPausou(em posicao: Double) {
-    guard ativa, sincronizado, estado?.tocando == true else { return }
+    guard ativa, sincronizado, !bloqueadoPeloDono(), estado?.tocando == true else { return }
     assumir(tocando: false, posicao: posicao)
     enviar(RoomCommand(tipo: "pause", posicao: posicao))
   }
 
   /// Arrastando a barra, só o ponto onde o dedo parou vai para a sala.
   func usuarioPulou(para posicao: Double) {
-    guard ativa, sincronizado else { return }
+    guard ativa, sincronizado, !bloqueadoPeloDono() else { return }
     assumir(posicao: posicao)
     puloTask?.cancel()
     puloTask = Task {
@@ -402,6 +513,7 @@ final class SalaController {
   }
 
   func usuarioPediuProximo(_ fileID: Int) {
+    guard !bloqueadoPeloDono() else { return }
     enviar(RoomCommand(tipo: "arquivo", fileID: fileID))
   }
 
@@ -439,5 +551,32 @@ final class SalaController {
         erro = error.localizedDescription
       }
     }
+  }
+}
+
+/// "Voltar para a sala": a última sala deste aparelho, por algumas horas.
+enum UltimaSala {
+  private static let chave = "ultimaSala"
+  private static let validade: TimeInterval = 6 * 3600
+
+  struct Registro: Codable {
+    let codigo: String
+    let fileID: Int
+    let em: Date
+  }
+
+  static func lembrar(codigo: String, fileID: Int) {
+    let r = Registro(codigo: codigo, fileID: fileID, em: .now)
+    UserDefaults.standard.set(try? JSONEncoder().encode(r), forKey: chave)
+  }
+
+  static func esquecer() { UserDefaults.standard.removeObject(forKey: chave) }
+
+  static var atual: Registro? {
+    guard let data = UserDefaults.standard.data(forKey: chave),
+      let r = try? JSONDecoder().decode(Registro.self, from: data),
+      Date.now.timeIntervalSince(r.em) < validade
+    else { return nil }
+    return r
   }
 }

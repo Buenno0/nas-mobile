@@ -215,14 +215,23 @@ struct SalaOverlay: View {
       .padding(.top, 70)
       .allowsHitTesting(false)
 
+      // Mensagens novas com o chat fechado aparecem um instante no canto.
+      UltimasDoChat(sala: sala)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+        .padding(.leading, 16)
+        .padding(.bottom, 150)
+
+      if sala.faltaParaComecar > 0 { ContagemRegressiva(sala: sala) }
+
       if controlesVisiveis { painel }
     }
     .foregroundStyle(.white)
     .sheet(isPresented: $sala.mostrandoConvite) { ConviteSheet(sala: sala) }
+    .sheet(isPresented: $sala.chatAberto) { ChatDaSala(sala: sala) }
     .confirmationDialog("Sair da sala?", isPresented: $saindo, titleVisibility: .visible) {
-      Button("Sair da sala") { sala.sair() }
+      Button("Sair da sala") { sala.sairDeProposito() }
       if sala.souDono {
-        Button("Encerrar para todos", role: .destructive) { sala.encerrar() }
+        Button("Encerrar para todos", role: .destructive) { Task { await sala.encerrar() } }
       }
       Button("Cancelar", role: .cancel) {}
     } message: {
@@ -245,7 +254,45 @@ struct SalaOverlay: View {
               .frame(width: 24, height: 24)
               .background(Color.ozAccent, in: .circle)
               .overlay { Circle().stroke(.black.opacity(0.6), lineWidth: 2) }
+              .overlay(alignment: .bottomTrailing) {
+                if nome != sala.eu {
+                  Circle()
+                    .fill(corDaConexao(sala.conexoes[nome]))
+                    .frame(width: 9, height: 9)
+                    .overlay { Circle().stroke(.black.opacity(0.7), lineWidth: 1.5) }
+                    .offset(x: 2, y: 2)
+                }
+              }
+              .accessibilityLabel("\(nome), \(descreverConexao(nome == sala.eu ? nil : sala.conexoes[nome]))")
           }
+        }
+        Button {
+          sala.chatAberto = true
+        } label: {
+          Text("Chat")
+            .overlay(alignment: .topTrailing) {
+              if sala.naoLidas > 0 {
+                Text("\(sala.naoLidas)")
+                  .font(.system(size: 10, weight: .bold))
+                  .foregroundStyle(.black)
+                  .padding(.horizontal, 4)
+                  .frame(minWidth: 16, minHeight: 16)
+                  .background(Color.ozAccent, in: .capsule)
+                  .offset(x: 14, y: -10)
+              }
+            }
+        }
+        .font(.caption.weight(.semibold))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(.white.opacity(0.18), in: .capsule)
+        if sala.souDono {
+          Button("🎬") { sala.alternarModoCinema() }
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(sala.modoCinema ? Color.ozAccent : .white.opacity(0.18), in: .capsule)
+            .accessibilityLabel(sala.modoCinema ? "Desligar modo cinema" : "Modo cinema: só você controla")
         }
         Button("Convidar") { sala.mostrandoConvite = true }
           .font(.caption.weight(.semibold))
@@ -276,6 +323,14 @@ struct SalaOverlay: View {
       }
       .padding(3)
       .background(.black.opacity(0.6), in: .capsule)
+
+      if sala.modoCinema, !sala.souDono {
+        Text("🎬 \(sala.estado?.dono ?? "") controla o vídeo")
+          .font(.caption)
+          .padding(.horizontal, 10)
+          .padding(.vertical, 5)
+          .background(.black.opacity(0.6), in: .capsule)
+      }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
     .padding(.trailing, 14)
@@ -306,5 +361,214 @@ private struct ReacaoFlutuante: View {
       .onAppear {
         withAnimation(.easeOut(duration: 3.6)) { subiu = true }
       }
+  }
+}
+
+private func corDaConexao(_ c: (conexao: RoomConnection, em: Date)?) -> Color {
+  guard let c, Date().timeIntervalSince(c.em) < 15 else { return .gray }
+  if c.conexao.travado || abs(c.conexao.dif) > 2 { return .red }
+  if abs(c.conexao.dif) > 0.5 { return .yellow }
+  return .green
+}
+
+private func descreverConexao(_ c: (conexao: RoomConnection, em: Date)?) -> String {
+  guard let c else { return "você" }
+  if Date().timeIntervalSince(c.em) > 15 { return "sem notícias" }
+  if c.conexao.travado { return "carregando" }
+  let s = abs(c.conexao.dif).formatted(.number.precision(.fractionLength(0...1)))
+  return abs(c.conexao.dif) < 0.5 ? "em sincronia" : "\(s) s \(c.conexao.dif > 0 ? "atrás" : "à frente")"
+}
+
+/// "3, 2, 1" antes do play que vem depois de uma pausa longa.
+private struct ContagemRegressiva: View {
+  let sala: SalaController
+
+  var body: some View {
+    TimelineView(.periodic(from: .now, by: 0.1)) { _ in
+      let falta = sala.faltaParaComecar
+      if falta > 0 {
+        let n = Int((Double(falta) / 1000).rounded(.up))
+        Text("\(n)")
+          .font(.system(size: 120, weight: .bold, design: .rounded).monospacedDigit())
+          .foregroundStyle(.white)
+          .shadow(radius: 20)
+          .contentTransition(.numericText(countsDown: true))
+          .animation(.snappy, value: n)
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+          .background(.black.opacity(0.4))
+          .allowsHitTesting(false)
+          .accessibilityLabel("Começa em \(n)")
+      }
+    }
+  }
+}
+
+private struct UltimasDoChat: View {
+  let sala: SalaController
+  @State private var visiveis: [RoomChatLine] = []
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      ForEach(visiveis, id: \.em) { l in
+        (Text(l.de).bold() + Text(": \(l.texto)"))
+          .font(.subheadline)
+          .lineLimit(2)
+          .padding(.horizontal, 12)
+          .padding(.vertical, 7)
+          .background(.black.opacity(0.75), in: .rect(cornerRadius: 14))
+          .transition(.move(edge: .leading).combined(with: .opacity))
+      }
+    }
+    .frame(maxWidth: 280, alignment: .leading)
+    .animation(.snappy, value: visiveis)
+    .onTapGesture { sala.chatAberto = true }
+    .onChange(of: sala.chat.count) { _, _ in
+      guard !sala.chatAberto, let ultima = sala.chat.last, ultima.de != sala.eu else { return }
+      visiveis = Array((visiveis + [ultima]).suffix(3))
+      Task {
+        try? await Task.sleep(for: .seconds(6))
+        visiveis.removeAll { $0 == ultima }
+      }
+    }
+  }
+}
+
+struct ChatDaSala: View {
+  let sala: SalaController
+  @State private var texto = ""
+  @FocusState private var focado: Bool
+  @Environment(\.dismiss) private var dismiss
+
+  var body: some View {
+    NavigationStack {
+      ScrollViewReader { rolagem in
+        ScrollView {
+          LazyVStack(alignment: .leading, spacing: 10) {
+            if sala.chat.isEmpty {
+              Text("Ninguém falou nada ainda.")
+                .foregroundStyle(.white.opacity(0.4))
+                .frame(maxWidth: .infinity)
+                .padding(.top, 40)
+            }
+            ForEach(Array(sala.chat.enumerated()), id: \.offset) { i, l in
+              let meu = l.de == sala.eu
+              VStack(alignment: meu ? .trailing : .leading, spacing: 2) {
+                Text(meu ? "você" : l.de).font(.caption2).foregroundStyle(.white.opacity(0.45))
+                Text(l.texto)
+                  .padding(.horizontal, 12)
+                  .padding(.vertical, 8)
+                  .background(meu ? Color.ozAccent : .white.opacity(0.12), in: .rect(cornerRadius: 16))
+                  .foregroundStyle(meu ? .black : .white)
+              }
+              .frame(maxWidth: .infinity, alignment: meu ? .trailing : .leading)
+              .id(i)
+            }
+          }
+          .padding()
+        }
+        .onChange(of: sala.chat.count) { _, n in
+          withAnimation { rolagem.scrollTo(n - 1, anchor: .bottom) }
+        }
+        .onAppear { rolagem.scrollTo(sala.chat.count - 1, anchor: .bottom) }
+      }
+      .safeAreaInset(edge: .bottom) {
+        HStack(spacing: 8) {
+          TextField("Escreva algo…", text: $texto)
+            .focused($focado)
+            .submitLabel(.send)
+            .onSubmit(mandar)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(.white.opacity(0.1), in: .capsule)
+          Button(action: mandar) {
+            Image(systemName: "arrow.up.circle.fill").font(.system(size: 32))
+          }
+          .disabled(texto.trimmingCharacters(in: .whitespaces).isEmpty)
+          .accessibilityLabel("Enviar")
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(.black)
+      }
+      .navigationTitle("Chat da sala")
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+        ToolbarItem(placement: .confirmationAction) { Button("Fechar") { dismiss() } }
+      }
+    }
+    .foregroundStyle(.white)
+    .presentationDetents([.medium, .large])
+    .presentationBackground(.black.opacity(0.94))
+    .preferredColorScheme(.dark)
+    .onAppear { focado = true }
+  }
+
+  private func mandar() {
+    sala.falar(texto)
+    texto = ""
+  }
+}
+
+// MARK: - Voltar para a sala (Home)
+
+/// Depois de fechar o app no meio de uma sala, a Home oferece voltar —
+/// se a sala ainda existir no servidor.
+struct VoltarParaSalaBanner: View {
+  @Bindable var store: SessionStore
+  let session: AuthenticatedSession
+  @Environment(PlaybackController.self) private var playback
+  @State private var sala: RoomState?
+  @State private var entrando = false
+
+  var body: some View {
+    Group {
+      if let sala, !playback.sala.ativa {
+        HStack(spacing: 10) {
+          Image(systemName: "shareplay").foregroundStyle(Color.ozAccent)
+          VStack(alignment: .leading, spacing: 1) {
+            Text("Sala \(sala.codigo) aberta").font(.subheadline.weight(.semibold))
+            if !sala.presenca.isEmpty {
+              Text("com \(sala.presenca.joined(separator: ", "))")
+                .font(.caption).foregroundStyle(Color.ozMuted).lineLimit(1)
+            }
+          }
+          Spacer(minLength: 4)
+          Button {
+            entrando = true
+            Task {
+              try? await playback.sala.entrar(codigo: sala.codigo, store: store, session: session)
+              entrando = false
+            }
+          } label: {
+            if entrando { ProgressView() } else { Text("Voltar") }
+          }
+          .buttonStyle(.borderedProminent)
+          Button {
+            UltimaSala.esquecer()
+            self.sala = nil
+          } label: {
+            Image(systemName: "xmark").font(.caption.weight(.bold))
+          }
+          .buttonStyle(.plain)
+          .foregroundStyle(Color.ozMuted)
+          .accessibilityLabel("Agora não")
+        }
+        .padding(12)
+        .background(.ultraThinMaterial, in: .rect(cornerRadius: 16))
+        .padding(.horizontal, 16)
+      }
+    }
+    .task(id: playback.sala.ativa) {
+      guard !playback.sala.ativa, let ultima = UltimaSala.atual else {
+        sala = nil
+        return
+      }
+      do {
+        sala = try await store.room(code: ultima.codigo, for: session)
+      } catch {
+        UltimaSala.esquecer()
+        sala = nil
+      }
+    }
   }
 }

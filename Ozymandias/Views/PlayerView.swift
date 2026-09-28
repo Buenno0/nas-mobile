@@ -35,6 +35,16 @@ struct PlayerView: View {
     }
     .preferredColorScheme(.dark)
     .statusBarHidden()
+    .alert(
+      "A sala foi encerrada",
+      isPresented: Binding(
+        get: { playback.sala.encerradaPor != nil },
+        set: { if !$0 { playback.sala.encerradaPor = nil } })
+    ) {
+      Button("Continuar sozinho") { playback.sala.encerradaPor = nil }
+    } message: {
+      Text("\(playback.sala.encerradaPor ?? "") encerrou a sessão. Você pode continuar assistindo sozinho.")
+    }
     .onAppear { syncTimeResolution() }
     .onChange(of: controlsVisible) { _, _ in syncTimeResolution() }
     .onChange(of: playback.subtitles) { _, _ in syncTimeResolution() }
@@ -106,7 +116,16 @@ struct PlayerView: View {
       VStack(spacing: 0) {
         topBar
         Spacer()
-        centerControls
+        if playback.sala.soAssiste {
+          Label("\(playback.sala.estado?.dono ?? "O anfitrião") controla o vídeo", systemImage: "film")
+            .font(.subheadline.weight(.medium))
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(.black.opacity(0.55), in: .capsule)
+            .foregroundStyle(.white)
+        } else {
+          centerControls
+        }
         Spacer()
         bottomControls
       }
@@ -181,6 +200,7 @@ struct PlayerView: View {
         in: 0...max(playback.duration, 1)
       )
       .tint(.ozAccent)
+      .disabled(playback.sala.soAssiste)
       .accessibilityLabel("Posição da reprodução")
       .accessibilityValue(
         "\(timeLabel(playback.currentTime)) de \(timeLabel(playback.duration))")
@@ -208,7 +228,7 @@ struct PlayerView: View {
           .accessibilityIdentifier("watchTogetherButton")
         }
 
-        if playback.hasNextItem {
+        if playback.hasNextItem, !playback.sala.soAssiste {
           Button {
             Task { await playback.playNext() }
           } label: {
