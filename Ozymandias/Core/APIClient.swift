@@ -430,23 +430,42 @@ struct APIClient: Sendable {
     _ request: URLRequest,
     retryingTransientFailures: Bool
   ) async throws -> (Data, URLResponse) {
-    let maximumAttempts = retryingTransientFailures ? 2 : 1
+    // Leituras insistem por até `reconnectWindow` quando o servidor responde
+    // 502/503/504: num deploy a nuvem troca de task e o Funnel devolve isso
+    // por alguns segundos.
+    let limit = Date.now.addingTimeInterval(retryingTransientFailures ? Self.reconnectWindow : 0)
     var attempt = 1
+    var delay: Duration = .milliseconds(250)
 
     while true {
       do {
-        return try await session.data(for: request)
+        let (data, response) = try await session.data(for: request)
+        if retryingTransientFailures,
+          let http = response as? HTTPURLResponse, [502, 503, 504].contains(http.statusCode),
+          Date.now < limit
+        {
+          try await Task.sleep(for: delay)
+          delay = min(delay * 2, .seconds(3))
+          continue
+        }
+        return (data, response)
       } catch is CancellationError {
         throw CancellationError()
       } catch {
-        guard attempt < maximumAttempts, Self.isTransientTransportError(error) else {
+        // Falha de transporte: uma segunda tentativa só (a conexão velha do
+        // pool que a troca de rede matou). Insistir aqui atrasaria o erro de
+        // quem está sem rede de verdade.
+        guard retryingTransientFailures, attempt < 2, Self.isTransientTransportError(error) else {
           throw APIClientError.transport(message: Self.transportMessage(for: error))
         }
         attempt += 1
-        try await Task.sleep(for: .milliseconds(250))
+        try await Task.sleep(for: delay)
+        delay = min(delay * 2, .seconds(3))
       }
     }
   }
+
+  static let reconnectWindow: TimeInterval = 25
 
   private func playbackPath(fileID: Int, audioTrack: Int?) -> String {
     capabilityPath(fileID: fileID, action: "playback", audioTrack: audioTrack)
