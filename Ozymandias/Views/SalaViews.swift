@@ -13,7 +13,7 @@ struct EntrarNaSalaBotao: View {
     Button {
       aberto = true
     } label: {
-      Image(systemName: "person.2.fill")
+      Image(systemName: "shareplay")
         .font(.system(size: 16, weight: .semibold))
         .foregroundStyle(.white)
         .frame(width: 44, height: 44)

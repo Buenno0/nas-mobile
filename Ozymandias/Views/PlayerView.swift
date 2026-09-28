@@ -203,7 +203,7 @@ struct PlayerView: View {
                 fileID: fileID, store: contexto.store, session: contexto.session)
             }
           } label: {
-            Label("Assistir junto", systemImage: "person.2.fill")
+            Label("Assistir junto", systemImage: "shareplay")
           }
           .accessibilityIdentifier("watchTogetherButton")
         }

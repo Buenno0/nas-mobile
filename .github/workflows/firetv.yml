@@ -22,7 +22,8 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - uses: android-actions/setup-android@v3
+      # O runner ubuntu-latest já traz o Android SDK (ANDROID_HOME) com as
+      # licenças aceitas; o setup-android só baixava de novo, e falhava nisso.
 
       - uses: gradle/actions/setup-gradle@v4
 
