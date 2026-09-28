@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -28,9 +29,13 @@ fun OzyArtwork(
   contentScale: ContentScale = ContentScale.Crop,
 ) {
   val url = path?.let { if (it.startsWith("http")) it else credential?.serverUrl + it }
-  Box(modifier.background(Elevated), contentAlignment = Alignment.Center) {
+  // Mesmo placeholder do iOS: um degradê da superfície elevada para o âmbar da
+  // marca. Um retângulo chapado deixava buracos escuros na grade enquanto as
+  // capas carregavam.
+  val placeholder = Brush.linearGradient(listOf(Elevated, Accent.copy(alpha = .48f)))
+  Box(modifier.background(placeholder), contentAlignment = Alignment.Center) {
     if (url == null) {
-      OzyMark(size = if (kind == ArtworkKind.POSTER) 52.dp else 68.dp)
+      OzyMark(size = if (kind == ArtworkKind.POSTER) 44.dp else 60.dp)
     } else {
       AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)

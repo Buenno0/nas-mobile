@@ -4,6 +4,8 @@ import UIKit
 @main
 struct OzymandiasApp: App {
   @State private var store: SessionStore
+  @State private var playback = PlaybackController()
+  @Environment(\.scenePhase) private var scenePhase
   @AppStorage("appearancePreference") private var appearancePreference = "dark"
 
   init() {
@@ -33,8 +35,16 @@ struct OzymandiasApp: App {
   var body: some Scene {
     WindowGroup {
       RootView(store: store)
+        .environment(playback)
         .preferredColorScheme(preferredScheme)
         .task { await store.restoreIfNeeded() }
+        // Salvar progresso ao sair do app não pode depender da tela do player
+        // estar montada — desde que a reprodução a sobrevive, ela quase nunca está.
+        .onChange(of: scenePhase) { _, phase in
+          playback.scenePhaseChanged(phase)
+          // Voltou para o app: pode ter saído de casa ou voltado ao Wi-Fi.
+          if phase == .active { Task { await store.refreshRoute() } }
+        }
     }
   }
 

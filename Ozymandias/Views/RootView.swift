@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootView: View {
   @Bindable var store: SessionStore
+  @Environment(PlaybackController.self) private var playback
 
   var body: some View {
     ZStack(alignment: .topTrailing) {
@@ -35,6 +36,20 @@ struct RootView: View {
     .tint(.ozAccent)
     .foregroundStyle(Color.ozInk)
     .background(Color.ozBackground.ignoresSafeArea())
+    // A reprodução passou a viver acima das telas, então ela não morre mais
+    // sozinha ao sair da conta. Sem isto, a música seguiria tocando por cima da
+    // tela de login — vale tanto para o logout quanto para o 401.
+    .onChange(of: isAuthenticated) { _, authenticated in
+      guard !authenticated else { return }
+      Task { await playback.stop() }
+    }
+  }
+
+  private var isAuthenticated: Bool {
+    switch store.phase {
+    case .authenticated, .passwordChangeRequired: true
+    case .restoring, .restoreFailed, .signedOut: false
+    }
   }
 
   /// Só nas telas sem barra de navegação. Dentro do app autenticado este botão

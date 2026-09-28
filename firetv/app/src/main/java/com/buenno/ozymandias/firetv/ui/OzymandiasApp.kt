@@ -13,20 +13,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.buenno.ozymandias.firetv.AppScreen
 import com.buenno.ozymandias.firetv.AppViewModel
+import com.buenno.ozymandias.firetv.allowsBack
 
 @Composable
 fun OzymandiasApp(model: AppViewModel) {
   val ui by model.ui.collectAsStateWithLifecycle()
   val discovered by model.discoveredServers.collectAsStateWithLifecycle()
 
-  BackHandler(enabled = ui.screen is AppScreen.Pairing || ui.screen is AppScreen.Login || ui.screen is AppScreen.Detail) {
-    model.back()
-  }
+  BackHandler(enabled = ui.screen.allowsBack()) { model.back() }
 
   Box(Modifier.fillMaxSize().background(Background)) {
     // Evita manter duas telas 1080p desenhadas durante crossfade no Fire Stick.
@@ -41,11 +39,15 @@ fun OzymandiasApp(model: AppViewModel) {
     }
 
     if (ui.loading) {
-      Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = .68f)), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
-          OzyMark(size = 58.dp)
+      Box(Modifier.fillMaxSize().background(Background.copy(alpha = .82f)), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+          OzyMark(size = 52.dp)
           CircularProgressIndicator(color = Accent, strokeWidth = 3.dp)
-          Text(ui.preparation?.let { "Preparando ${it.percentage}%" } ?: "Só um instante…", color = Ink)
+          Text(
+            ui.preparation?.let { "Preparando ${it.percentage}%" } ?: "Só um instante…",
+            color = Ink,
+            style = OzyType.body,
+          )
         }
       }
     }
@@ -59,7 +61,7 @@ fun BrandStatus(message: String) {
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Center,
   ) {
-    OzyMark(size = 82.dp)
-    Text(message, Modifier.padding(top = 24.dp), color = Muted)
+    OzyMark(size = 64.dp)
+    Text(message, Modifier.padding(top = 20.dp), color = Muted, style = OzyType.body)
   }
 }

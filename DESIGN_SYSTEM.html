@@ -1,0 +1,1527 @@
+<title>Ozymandias Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+:root{
+  --bg:#F6F3EE;
+  --surface:#FDFBF7;
+  --elevated:#EFE9DF;
+  --line:#D0C4B1;
+  --ink:#241E17;
+  --muted:#6B6154;
+  --accent:#9D5A26;
+  --accent-ink:#FDFBF7;
+  --danger:#9C3F1D;
+  --warning:#8A5A12;
+  --okay:#2F6F52;
+  --hairline:rgba(36,30,23,.13);
+  --shadow:0 1px 2px rgba(36,30,23,.05), 0 8px 24px rgba(36,30,23,.06);
+  --code-bg:rgba(157,90,38,.07);
+  --swatch-ring:rgba(36,30,23,.16);
+
+  --display:"Fraunces", "Iowan Old Style", Georgia, serif;
+  --sans:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --rail:270px;
+  --pad:clamp(20px, 4vw, 56px);
+  --maxw:1180px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+
+  
+    --bg:#0C0A08;
+    --surface:#16130F;
+    --elevated:#211C15;
+    --line:#40372B;
+    --ink:#F4EFE4;
+    --muted:#A99A84;
+    --accent:#D29A44;
+    --accent-ink:#1A1206;
+    --danger:#E08163;
+    --warning:#DCA84A;
+    --okay:#7FB79A;
+    --hairline:rgba(244,239,228,.12);
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    --code-bg:rgba(210,154,68,.10);
+    --swatch-ring:rgba(244,239,228,.18);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C0A08;
+  --surface:#16130F;
+  --elevated:#211C15;
+  --line:#40372B;
+  --ink:#F4EFE4;
+  --muted:#A99A84;
+  --accent:#D29A44;
+  --accent-ink:#1A1206;
+  --danger:#E08163;
+  --warning:#DCA84A;
+  --okay:#7FB79A;
+  --hairline:rgba(244,239,228,.12);
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  --code-bg:rgba(210,154,68,.10);
+  --swatch-ring:rgba(244,239,228,.18);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:15.5px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{text-wrap:balance;margin:0}
+a{color:inherit}
+p{margin:0}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:var(--rail) minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+.rail{
+  position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;
+  border-right:1px solid var(--hairline);
+  padding:34px 22px 40px 26px;
+  background:var(--bg);
+}
+.rail .brand{display:flex;align-items:center;gap:11px;margin-bottom:26px}
+.rail .brand b{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:-.02em}
+.rail .brand span{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.toc{display:flex;flex-direction:column;gap:1px}
+.toc a{
+  display:flex;gap:10px;align-items:baseline;
+  text-decoration:none;padding:5px 9px;border-radius:7px;
+  font-size:13.5px;color:var(--muted);
+}
+.toc a em{font-family:var(--mono);font-style:normal;font-size:11px;color:var(--accent);min-width:22px}
+.toc a:hover{background:var(--elevated);color:var(--ink)}
+.toc a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toc .grp{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);opacity:.7;margin:16px 0 5px 9px}
+
+main{padding:0 var(--pad) 120px;min-width:0}
+.wrap{max-width:var(--maxw);margin:0 auto}
+
+/* ---------- hero ---------- */
+.hero{padding:76px 0 44px;border-bottom:1px solid var(--hairline)}
+.hero .kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.hero h1{font-family:var(--display);font-weight:600;font-size:clamp(40px,6.4vw,74px);line-height:1.02;letter-spacing:-.028em;margin:16px 0 0}
+.hero .lede{max-width:62ch;margin-top:20px;font-size:18px;color:var(--muted)}
+.hero .markrow{display:flex;align-items:center;gap:26px;flex-wrap:wrap;margin-top:34px}
+.factbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--hairline);border:1px solid var(--hairline);border-radius:12px;overflow:hidden;margin-top:38px}
+.factbar div{background:var(--bg);padding:14px 16px}
+.factbar dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.factbar dd{margin:4px 0 0;font-size:14.5px;font-weight:500}
+
+/* ---------- sections ---------- */
+section{padding:64px 0 8px;scroll-margin-top:20px}
+section+section{border-top:1px solid var(--hairline)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent)}
+section>h2{font-family:var(--display);font-weight:600;font-size:clamp(27px,3.4vw,38px);letter-spacing:-.022em;line-height:1.1;margin:10px 0 0}
+section>.intro{max-width:66ch;margin-top:14px;color:var(--muted);font-size:16px}
+h3{font-family:var(--sans);font-weight:600;font-size:17.5px;letter-spacing:-.01em;margin:42px 0 0}
+h4{font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:30px 0 0}
+.stack{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.note{max-width:70ch;color:var(--muted);font-size:14.5px}
+.note strong{color:var(--ink);font-weight:600}
+
+code,.tk{font-family:var(--mono);font-size:.88em;background:var(--code-bg);color:var(--accent);padding:1px 5px;border-radius:5px;white-space:nowrap}
+
+/* ---------- tables ---------- */
+.tablewrap{overflow-x:auto;margin-top:18px;border:1px solid var(--hairline);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.6px;min-width:520px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--hairline);vertical-align:top}
+thead th{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;background:var(--elevated);white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+td.mono,th.mono,.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td b{font-weight:600}
+tbody tr:hover{background:var(--elevated)}
+
+/* ---------- swatches ---------- */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(214px,1fr));gap:14px;margin-top:20px}
+.sw{border:1px solid var(--hairline);border-radius:13px;overflow:hidden;background:var(--surface)}
+.sw .duo{display:grid;grid-template-columns:1fr 1fr;height:74px}
+.sw .duo i{display:block;position:relative}
+.sw .duo i::after{
+  content:attr(data-t);position:absolute;left:8px;bottom:6px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.62
+}
+.sw .duo i:first-child{box-shadow:inset 0 0 0 1px var(--swatch-ring)}
+.sw .meta{padding:11px 13px 13px}
+.sw .meta b{display:block;font-size:14px;font-weight:600}
+.sw .meta .hex{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+.sw .meta .use{font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.45}
+
+/* ---------- specimen ---------- */
+.spec{border:1px solid var(--hairline);border-radius:13px;background:var(--surface);padding:18px 20px;margin-top:14px;display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:20px;align-items:center}
+.spec .sample{overflow:hidden;color:var(--ink)}
+.spec .facts{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.75;font-variant-numeric:tabular-nums;text-align:right}
+.spec .facts b{color:var(--ink);font-weight:600}
+
+/* ---------- cards / components ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(316px,1fr));gap:16px;margin-top:20px}
+.card{border:1px solid var(--hairline);border-radius:14px;background:var(--surface);padding:18px 20px 20px;box-shadow:var(--shadow)}
+.card h5{margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.card .path{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:5px;word-break:break-all}
+.card dl{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:14px 0 0;font-size:13.2px}
+.card dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.card dd{margin:0}
+.tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:5px;border:1px solid var(--hairline);color:var(--muted);white-space:nowrap}
+.tag.ios{color:var(--accent);border-color:color-mix(in srgb, var(--accent) 42%, transparent)}
+.tag.tv{color:var(--okay);border-color:color-mix(in srgb, var(--okay) 42%, transparent)}
+.tag.both{color:var(--ink);border-color:var(--line)}
+
+/* ---------- callouts ---------- */
+.rule{border-left:3px solid var(--accent);background:var(--elevated);border-radius:0 11px 11px 0;padding:13px 17px;margin-top:16px;font-size:14.2px;max-width:78ch}
+.rule b{font-weight:600}
+.rule.warn{border-left-color:var(--warning)}
+.rule.no{border-left-color:var(--danger)}
+
+.dodont{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:18px}
+.dd{border:1px solid var(--hairline);border-radius:12px;padding:15px 17px;background:var(--surface)}
+.dd h6{margin:0 0 8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase}
+.dd.do h6{color:var(--okay)}
+.dd.dont h6{color:var(--danger)}
+.dd ul{margin:0;padding-left:17px;font-size:13.6px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.dd li strong{color:var(--ink);font-weight:600}
+
+ul.plain{margin:14px 0 0;padding-left:18px;font-size:14.4px;color:var(--muted);display:flex;flex-direction:column;gap:8px;max-width:74ch}
+ul.plain strong{color:var(--ink);font-weight:600}
+ul.plain code{white-space:normal}
+
+/* ---------- logo lab ---------- */
+.logolab{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:20px}
+.logobox{border:1px solid var(--hairline);border-radius:14px;padding:22px;display:flex;flex-direction:column;align-items:center;gap:14px;justify-content:center}
+.logobox .cap{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center}
+.on-dark{background:#0C0A08;color:#F4EFE4}
+.on-light{background:#F6F3EE;color:#241E17}
+.on-accent{background:#D29A44;color:#1A1206}
+
+/* ---------- focus demo ---------- */
+.focusdemo{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-end;margin-top:20px;padding:26px;border-radius:14px;background:#0C0A08;border:1px solid var(--hairline)}
+.poster{width:116px}
+.poster .art{aspect-ratio:2/3;border-radius:13px;background:linear-gradient(135deg,#211C15,rgba(210,154,68,.48));display:grid;place-items:center}
+.poster .t{color:#F4EFE4;font-size:12.5px;margin-top:7px;line-height:1.3}
+.poster .y{color:#A99A84;font-size:11px}
+.poster.focused{transform:scale(1.06);background:rgba(210,154,68,.16);padding:5px;border-radius:18px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.poster.focused .art{box-shadow:0 0 0 2px rgba(244,239,228,.94)}
+
+/* ---------- gap list ---------- */
+.gaps{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+.gap{border:1px solid var(--hairline);border-left-width:3px;border-radius:0 12px 12px 0;background:var(--surface);padding:14px 18px}
+.gap.p1{border-left-color:var(--danger)}
+.gap.p2{border-left-color:var(--warning)}
+.gap.p3{border-left-color:var(--muted)}
+.gap b{display:block;font-size:14.6px;font-weight:600}
+.gap p{margin-top:5px;font-size:13.6px;color:var(--muted);max-width:82ch}
+.gap .sev{float:right;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+footer{margin-top:70px;padding-top:26px;border-top:1px solid var(--hairline);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
+
+@media (max-width:960px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--hairline);padding:22px var(--pad)}
+  .toc{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:2px}
+  .spec{grid-template-columns:1fr}
+  .spec .facts{text-align:left}
+  .hero{padding-top:40px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="shell">
+<nav class="rail">
+  <div class="brand">
+    <svg width="34" height="34" viewBox="0 0 96 96" aria-hidden="true">
+      <path d="M18 22C18 14 27 9 48 9C69 9 78 14 78 22L78 52C78 68 66 80 48 87C30 80 18 68 18 52Z" fill="var(--accent)"/>
+      <g fill="var(--bg)">
+        <path d="M24 24C24 18 32 14 48 14C64 14 72 18 72 24L72 34L24 34Z" opacity=".42"/>
+        <rect x="24" y="36" width="48" height="4" opacity=".42"/>
+        <circle cx="37" cy="53" r="8"/><circle cx="59" cy="53" r="8"/>
+        <path d="M41 66L41 78L55 72Z"/>
+      </g>
+    </svg>
+    <div><b>Ozymandias</b><span>Design System v1</span></div>
+  </div>
+  <div class="toc">
+    <div class="grp">Fundamentos</div>
+    <a href="#principios"><em>01</em>Princípios</a>
+    <a href="#marca"><em>02</em>Marca e ícone</a>
+    <a href="#cor"><em>03</em>Cor</a>
+    <a href="#tipografia"><em>04</em>Tipografia</a>
+    <a href="#espaco"><em>05</em>Espaço e grid</a>
+    <a href="#forma"><em>06</em>Forma e elevação</a>
+    <a href="#icones"><em>07</em>Iconografia</a>
+    <a href="#arte"><em>08</em>Arte e imagem</a>
+    <div class="grp">Componentes</div>
+    <a href="#comp-ios"><em>09</em>Componentes iPhone</a>
+    <a href="#comp-tv"><em>10</em>Componentes Fire TV</a>
+    <a href="#estados"><em>11</em>Foco, toque e estados</a>
+    <a href="#movimento"><em>12</em>Movimento</a>
+    <div class="grp">Aplicação</div>
+    <a href="#telas"><em>13</em>Telas e fluxos</a>
+    <a href="#tema"><em>14</em>Claro e escuro</a>
+    <a href="#acessibilidade"><em>15</em>Acessibilidade</a>
+    <a href="#voz"><em>16</em>Voz e texto</a>
+    <a href="#lacunas"><em>17</em>Lacunas em aberto</a>
+  </div>
+</nav>
+
+<main>
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">Especificação completa · iPhone + Fire TV</div>
+  <h1>Ozymandias<br>Design System</h1>
+  <p class="lede">Um servidor de mídia doméstico com dois clientes: um app de iPhone que se toca com o polegar e um app de Fire TV que se navega com D-pad a três metros de distância. Este documento é o inventário integral do que existe hoje no código — cor, tipo, forma, componente por componente, estado por estado — e a lista honesta do que ainda não foi decidido.</p>
+
+  <div class="markrow">
+    <svg width="86" height="86" viewBox="0 0 96 96" role="img" aria-label="Marca Ozymandias">
+      <path d="M18 22C18 14 27 9 48 9C69 9 78 14 78 22L78 52C78 68 66 80 48 87C30 80 18 68 18 52Z" fill="var(--accent)"/>
+      <g fill="var(--bg)">
+        <path d="M24 24C24 18 32 14 48 14C64 14 72 18 72 24L72 34L24 34Z" opacity=".42"/>
+        <rect x="24" y="36" width="48" height="4" opacity=".42"/>
+        <circle cx="37" cy="53" r="8"/><circle cx="59" cy="53" r="8"/>
+        <path d="M41 66L41 78L55 72Z"/>
+      </g>
+    </svg>
+    <div class="note" style="max-width:44ch">
+      <strong>Para quem é este documento.</strong> Para o time de UI/UX que vai redesenhar, estender ou auditar os dois apps. Tudo aqui foi extraído do código-fonte em produção, não de um protótipo: cada valor citado existe hoje em um arquivo <code>.swift</code> ou <code>.kt</code>.
+    </div>
+  </div>
+
+  <dl class="factbar">
+    <div><dt>Cliente A</dt><dd>iPhone · SwiftUI · iOS 26.0</dd></div>
+    <div><dt>Cliente B</dt><dd>Fire TV · Compose · minSdk 25</dd></div>
+    <div><dt>Idioma</dt><dd>Português do Brasil</dd></div>
+    <div><dt>Tokens de cor</dt><dd>11 semânticos × 2 temas</dd></div>
+    <div><dt>Degraus de tipo</dt><dd>7 na TV · SF nativo no iPhone</dd></div>
+    <div><dt>Telas mapeadas</dt><dd>15 no iPhone · 7 na TV</dd></div>
+  </dl>
+</header>
+
+<!-- ============ 01 PRINCÍPIOS ============ -->
+<section id="principios">
+  <div class="eyebrow">01 · principios/</div>
+  <h2>Sete decisões que explicam todo o resto</h2>
+  <p class="intro">Os dois apps compartilham identidade, não implementação. Antes de qualquer token, estas são as regras que resolvem 90% das dúvidas de design que aparecem no dia a dia.</p>
+
+  <div class="cards">
+    <div class="card">
+      <h5>1. Um acervo, dois corpos <span class="tag both">ambos</span></h5>
+      <p class="path">mesma paleta · mesma marca · mesmos nomes de tela</p>
+      <p class="note" style="margin-top:12px">iPhone e Fire TV usam a mesma paleta sépia e a mesma marca, mas nunca a mesma interação. O iPhone segue a HIG da Apple (toque, gestos, Liquid Glass); a TV segue foco por D-pad. Nada é portado literalmente entre eles.</p>
+    </div>
+    <div class="card">
+      <h5>2. A arte é a interface <span class="tag both">ambos</span></h5>
+      <p class="path">pôster 2:3 · backdrop 16:9</p>
+      <p class="note" style="margin-top:12px">Capas e backdrops ocupam a maior parte da tela. O sistema é o mais neutro possível para não competir: fundos sépia escuros, texto quente e um único âmbar de marca.</p>
+    </div>
+    <div class="card">
+      <h5>3. Branco puro é proibido <span class="tag both">ambos</span></h5>
+      <p class="path">Ink #F4EFE4 no escuro · #241E17 no claro</p>
+      <p class="note" style="margin-top:12px">Não existe <code>#FFFFFF</code> nem <code>#000000</code> na UI. Branco puro encostado no fundo sépia foi o que fazia os dois apps parecerem produtos diferentes. Exceção única: a camada de vídeo do player, que é preta de verdade, e o botão primário de vidro do banner do iPhone.</p>
+    </div>
+    <div class="card">
+      <h5>4. Uma margem só <span class="tag tv">Fire TV</span></h5>
+      <p class="path">OzyTvTokens.gutter = 56dp</p>
+      <p class="note" style="margin-top:12px">Antes eram quatro margens diferentes (48/58/76/88) conforme a tela. Hoje toda tela de TV respira a mesma faixa de 56 dp; o iPhone usa 16 pt em todo conteúdo de lista.</p>
+    </div>
+    <div class="card">
+      <h5>5. Foco é o único destaque <span class="tag tv">Fire TV</span></h5>
+      <p class="path">escala 1.06 · anel Ink · halo âmbar</p>
+      <p class="note" style="margin-top:12px">Em repouso, nenhum card tem borda. No foco: escala, anel quente e halo âmbar, sempre dentro de uma faixa reservada de 6 dp para o layout não pular.</p>
+    </div>
+    <div class="card">
+      <h5>6. Vidro só em controle <span class="tag ios">iPhone</span></h5>
+      <p class="path">HIG · Liquid Glass iOS 26</p>
+      <p class="note" style="margin-top:12px">Liquid Glass é aplicado apenas em elementos acionáveis (botão de assistir, ações circulares do banner). Nunca em decoração, chip de metadado ou fundo de conteúdo.</p>
+    </div>
+    <div class="card">
+      <h5>7. Cor com parcimônia sobre arte <span class="tag both">ambos</span></h5>
+      <p class="path">ação primária neutra sobre pôster</p>
+      <p class="note" style="margin-top:12px">Sobre arte colorida, a ação primária é neutra: vidro branco no iPhone, <code>Ink</code> sólido com texto <code>AccentInk</code> na TV. O âmbar da marca aparece em superfícies próprias, não por cima de capas.</p>
+    </div>
+    <div class="card">
+      <h5>8. Escuro é o padrão <span class="tag both">ambos</span></h5>
+      <p class="path">appearancePreference = "dark"</p>
+      <p class="note" style="margin-top:12px">O iPhone abre no escuro e oferece Claro/Sistema no Perfil. A TV é escuro-único: não existe tema claro no Fire TV e não deve existir — sala escura, tela grande, emissiva.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 MARCA ============ -->
+<section id="marca">
+  <div class="eyebrow">02 · marca/</div>
+  <h2>Marca e ícone</h2>
+  <p class="intro">A marca é uma máscara funerária estilizada com um triângulo de <em>play</em> na boca — "Ozymandias" é o nome grego de Ramsés II, e o app guarda um acervo que sobrevive ao servidor que o serve. Ela é desenhada em código nas duas plataformas (SwiftUI <code>Canvas</code> e Compose <code>drawWithCache</code>), nunca importada como bitmap.</p>
+
+  <h3>Geometria — grade 96 × 96</h3>
+  <p class="note">Todas as coordenadas abaixo são absolutas na grade de 96, escaladas proporcionalmente para o tamanho pedido. Reproduza esta geometria exatamente ao redesenhar; ela é idêntica nas duas plataformas.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Elemento</th><th>Descrição</th><th class="mono">Geometria (grade 96)</th></tr></thead>
+      <tbody>
+        <tr><td><b>Corpo</b></td><td>Silhueta da cabeça, ombros retos, base em ponta</td><td class="mono">M18,22 C18,14 27,9 48,9 · C69,9 78,14 78,22 · L78,52 · C78,68 66,80 48,87 · C30,80 18,68 18,52 · Z</td></tr>
+        <tr><td><b>Nêmes</b> (toucado)</td><td>Faixa superior da coroa</td><td class="mono">M24,24 C24,18 32,14 48,14 · C64,14 72,18 72,24 · L72,34 · L24,34 · Z</td></tr>
+        <tr><td><b>Barra</b></td><td>Segunda faixa do toucado</td><td class="mono">rect x24 y36 w48 h4</td></tr>
+        <tr><td><b>Olhos</b></td><td>Dois círculos vazados</td><td class="mono">c(37,53) r8 · c(59,53) r8</td></tr>
+        <tr><td><b>Play</b></td><td>Triângulo na posição da boca</td><td class="mono">M41,66 L41,78 L55,72 Z</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Cores da marca por tema</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Parte</th><th>Tema escuro</th><th>Tema claro</th><th>Observação</th></tr></thead>
+      <tbody>
+        <tr><td>Corpo</td><td class="mono">Accent #D29A44</td><td class="mono">Ink #241E17</td><td>No claro a marca é tinta sobre papel; no escuro é ouro sobre sépia</td></tr>
+        <tr><td>Toucado + barra</td><td class="mono">AccentInk #1A1206 @ 38%</td><td class="mono">#C98F3C @ 100%</td><td>Opacidade 0.38 só no escuro, para não virar um bloco preto</td></tr>
+        <tr><td>Olhos e play (vazados)</td><td class="mono">AccentInk #1A1206</td><td class="mono">Background #F6F3EE</td><td>Vazados leem como recorte, não como desenho</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="logolab">
+    <div class="logobox on-dark">
+      <svg width="72" height="72" viewBox="0 0 96 96" aria-hidden="true">
+        <path d="M18 22C18 14 27 9 48 9C69 9 78 14 78 22L78 52C78 68 66 80 48 87C30 80 18 68 18 52Z" fill="#D29A44"/>
+        <g fill="#1A1206"><path d="M24 24C24 18 32 14 48 14C64 14 72 18 72 24L72 34L24 34Z" opacity=".38"/><rect x="24" y="36" width="48" height="4" opacity=".38"/><circle cx="37" cy="53" r="8"/><circle cx="59" cy="53" r="8"/><path d="M41 66L41 78L55 72Z"/></g>
+      </svg>
+      <div class="cap">Escuro · padrão<br>corpo âmbar</div>
+    </div>
+    <div class="logobox on-light">
+      <svg width="72" height="72" viewBox="0 0 96 96" aria-hidden="true">
+        <path d="M18 22C18 14 27 9 48 9C69 9 78 14 78 22L78 52C78 68 66 80 48 87C30 80 18 68 18 52Z" fill="#241E17"/>
+        <path d="M24 24C24 18 32 14 48 14C64 14 72 18 72 24L72 34L24 34Z" fill="#C98F3C"/><rect x="24" y="36" width="48" height="4" fill="#C98F3C"/>
+        <g fill="#F6F3EE"><circle cx="37" cy="53" r="8"/><circle cx="59" cy="53" r="8"/><path d="M41 66L41 78L55 72Z"/></g>
+      </svg>
+      <div class="cap">Claro<br>corpo tinta</div>
+    </div>
+    <div class="logobox on-accent">
+      <svg width="72" height="72" viewBox="0 0 96 96" aria-hidden="true">
+        <path d="M18 22C18 14 27 9 48 9C69 9 78 14 78 22L78 52C78 68 66 80 48 87C30 80 18 68 18 52Z" fill="#1A1206"/>
+        <g fill="#D29A44"><path d="M24 24C24 18 32 14 48 14C64 14 72 18 72 24L72 34L24 34Z" opacity=".5"/><rect x="24" y="36" width="48" height="4" opacity=".5"/><circle cx="37" cy="53" r="8"/><circle cx="59" cy="53" r="8"/><path d="M41 66L41 78L55 72Z"/></g>
+      </svg>
+      <div class="cap">Sobre âmbar · a definir<br>não existe no código</div>
+    </div>
+    <div class="logobox on-dark">
+      <svg width="30" height="30" viewBox="0 0 96 96" aria-hidden="true">
+        <path d="M18 22C18 14 27 9 48 9C69 9 78 14 78 22L78 52C78 68 66 80 48 87C30 80 18 68 18 52Z" fill="#D29A44"/>
+        <g fill="#1A1206"><path d="M24 24C24 18 32 14 48 14C64 14 72 18 72 24L72 34L24 34Z" opacity=".38"/><rect x="24" y="36" width="48" height="4" opacity=".38"/><circle cx="37" cy="53" r="8"/><circle cx="59" cy="53" r="8"/><path d="M41 66L41 78L55 72Z"/></g>
+      </svg>
+      <div class="cap">30 px · limite de leitura<br>abaixo disso os olhos fecham</div>
+    </div>
+  </div>
+
+  <h3>Tamanhos em uso</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Tamanho</th><th>Plataforma</th><th>Onde</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">42 dp</td><td>Fire TV</td><td>Topo do rail de navegação</td></tr>
+        <tr><td class="mono">44 dp</td><td>Fire TV</td><td>Placeholder de pôster sem arte</td></tr>
+        <tr><td class="mono">48 pt</td><td>iPhone</td><td>Valor padrão de <code>MarkView</code></td></tr>
+        <tr><td class="mono">52 dp</td><td>Fire TV</td><td>Overlay de carregamento global</td></tr>
+        <tr><td class="mono">56 dp</td><td>Fire TV</td><td>Coluna esquerda do <code>OzySplitShell</code> (servidor, login, pareamento, conta)</td></tr>
+        <tr><td class="mono">60 dp</td><td>Fire TV</td><td>Placeholder de backdrop/landscape sem arte</td></tr>
+        <tr><td class="mono">64 pt / 64 dp</td><td>ambos</td><td>Tela de restauração de sessão e falha de servidor</td></tr>
+        <tr><td class="mono">72 pt</td><td>iPhone</td><td>Cabeçalho de marca no login e topo do Perfil</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Ícone do app (iOS)</h3>
+  <p class="note">Três variantes 1024 × 1024, no formato de aparências do iOS 18+: <code>AppIcon-light</code>, <code>AppIcon-dark</code> e <code>AppIcon-tinted</code>. O sistema aplica a máscara e o brilho; o arquivo é entregue sem cantos arredondados e sem sombra.</p>
+  <div class="rule warn"><b>Pendência de arte.</b> A variante <em>tinted</em> precisa funcionar em escala de cinza — o toucado a 38% e o corpo âmbar colapsam para tons próximos. Recomenda-se separar as massas por luminância, não por matiz, nessa variante.</div>
+
+  <h3>Assinatura verbal</h3>
+  <ul class="plain">
+    <li>Nome sempre por extenso: <strong>Ozymandias</strong>. Nunca "Ozy" na interface (o prefixo <code>Ozy</code> é só nome de código: <code>OzyMark</code>, <code>OzyType</code>, <code>OzyTvTokens</code>).</li>
+    <li>Assinatura de login: <strong>"Seu acervo, na sua rede."</strong> — subtítulo em <code>subheadline</code>, cor <code>Muted</code>.</li>
+    <li>Lockup vertical (marca 72 + nome em <code>largeTitle bold</code> com <code>tracking −1</code> + assinatura) é o único lockup existente. Não há versão horizontal aprovada.</li>
+  </ul>
+</section>
+
+<!-- ============ 03 COR ============ -->
+<section id="cor">
+  <div class="eyebrow">03 · cor/</div>
+  <h2>Cor</h2>
+  <p class="intro">Onze tokens semânticos, definidos uma vez por tema. Não existe cor literal em nenhuma tela: no iPhone os tokens vivem em <code>Assets.xcassets</code> como <em>color sets</em> com aparências claro/escuro; na TV vivem como <code>val</code> em <code>Theme.kt</code>. Os valores do tema escuro do iPhone e os da TV são <strong>idênticos byte a byte</strong> — é isso que faz os dois apps parecerem o mesmo produto.</p>
+
+  <h3>Paleta semântica</h3>
+  <div class="swatches">
+    <div class="sw"><div class="duo"><i style="background:#F6F3EE" data-t="claro"></i><i style="background:#0C0A08;color:#F4EFE4" data-t="escuro"></i></div><div class="meta"><b>Background</b><div class="hex">#F6F3EE &nbsp;/&nbsp; #0C0A08</div><div class="use">Fundo de todas as telas. É o piso; nada fica atrás dele.</div></div></div>
+    <div class="sw"><div class="duo"><i style="background:#FDFBF7" data-t="claro"></i><i style="background:#16130F;color:#F4EFE4" data-t="escuro"></i></div><div class="meta"><b>Surface</b><div class="hex">#FDFBF7 &nbsp;/&nbsp; #16130F</div><div class="use">Cartões, painéis, campos em repouso, chips não selecionados.</div></div></div>
+    <div class="sw"><div class="duo"><i style="background:#EFE9DF" data-t="claro"></i><i style="background:#211C15;color:#F4EFE4" data-t="escuro"></i></div><div class="meta"><b>Elevated</b><div class="hex">#EFE9DF &nbsp;/&nbsp; #211C15</div><div class="use">Um degrau acima: campos de texto, botão secundário, linha de servidor, base de placeholder de arte.</div></div></div>
+    <div class="sw"><div class="duo"><i style="background:#D0C4B1" data-t="claro"></i><i style="background:#40372B;color:#F4EFE4" data-t="escuro"></i></div><div class="meta"><b>Line</b><div class="hex">#D0C4B1 &nbsp;/&nbsp; #40372B</div><div class="use">Contorno de 1 px/dp, divisórias e trilho vazio de progresso. Nunca texto.</div></div></div>
+    <div class="sw"><div class="duo"><i style="background:#241E17;color:#F6F3EE" data-t="claro"></i><i style="background:#F4EFE4;color:#241E17" data-t="escuro"></i></div><div class="meta"><b>Ink</b><div class="hex">#241E17 &nbsp;/&nbsp; #F4EFE4</div><div class="use">Texto principal. Na TV é também o preenchimento do foco e da ação primária.</div></div></div>
+    <div class="sw"><div class="duo"><i style="background:#6B6154;color:#F6F3EE" data-t="claro"></i><i style="background:#A99A84;color:#241E17" data-t="escuro"></i></div><div class="meta"><b>Muted</b><div class="hex">#6B6154 &nbsp;/&nbsp; #A99A84</div><div class="use">Texto secundário, rótulos, ícone de item não selecionado, placeholder.</div></div></div>
+    <div class="sw"><div class="duo"><i style="background:#9D5A26;color:#FDFBF7" data-t="claro"></i><i style="background:#D29A44;color:#1A1206" data-t="escuro"></i></div><div class="meta"><b>Accent</b><div class="hex">#9D5A26 &nbsp;/&nbsp; #D29A44</div><div class="use">Âmbar da marca: tint do app, item selecionado, progresso, ícone de ação, foco de campo.</div></div></div>
+    <div class="sw"><div class="duo"><i style="background:#FDFBF7" data-t="claro"></i><i style="background:#1A1206;color:#D29A44" data-t="escuro"></i></div><div class="meta"><b>AccentInk</b><div class="hex">#FDFBF7 &nbsp;/&nbsp; #1A1206</div><div class="use">O que se escreve <em>em cima</em> de Accent (e, na TV, em cima de Ink).</div></div></div>
+    <div class="sw"><div class="duo"><i style="background:#2F6F52;color:#F6F3EE" data-t="claro"></i><i style="background:#7FB79A;color:#241E17" data-t="escuro"></i></div><div class="meta"><b>Okay</b><div class="hex">#2F6F52 &nbsp;/&nbsp; #7FB79A</div><div class="use">Sucesso: sessão confirmada, TV conectada, arquivo assistido, ponto de status conectado.</div></div></div>
+    <div class="sw"><div class="duo"><i style="background:#8A5A12;color:#F6F3EE" data-t="claro"></i><i style="background:#DCA84A;color:#241E17" data-t="escuro"></i></div><div class="meta"><b>Warning</b><div class="hex">#8A5A12 &nbsp;/&nbsp; #DCA84A</div><div class="use">Atenção reversível: sessão perto de vencer, senha inicial, servidor indisponível.</div></div></div>
+    <div class="sw"><div class="duo"><i style="background:#9C3F1D;color:#F6F3EE" data-t="claro"></i><i style="background:#E08163;color:#241E17" data-t="escuro"></i></div><div class="meta"><b>Danger</b><div class="hex">#9C3F1D &nbsp;/&nbsp; #E08163</div><div class="use">Falha e destruição: erro de reprodução, banner de erro, "Sair", ação destrutiva.</div></div></div>
+  </div>
+
+  <div class="rule warn"><b>Colisão conhecida.</b> No tema claro, <code>Surface</code> e <code>AccentInk</code> são o mesmo valor (<code>#FDFBF7</code>). Funciona hoje porque nunca se encostam, mas são conceitos diferentes: se a paleta clara for revista, separe-os.</div>
+
+  <h3>Cores derivadas — as opacidades que o sistema usa</h3>
+  <p class="note">Estas não são tokens novos; são derivações fixas de tokens existentes. Toda transparência usada nos dois apps está listada aqui. Não invente novas sem incluí-las nesta tabela.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Derivada</th><th class="mono">Fórmula</th><th>Plataforma</th><th>Uso</th></tr></thead>
+      <tbody>
+        <tr><td><b>FocusRing</b></td><td class="mono">Ink @ 94%</td><td>Fire TV</td><td>Anel de 2 dp no elemento focado</td></tr>
+        <tr><td><b>FocusHalo</b></td><td class="mono">Accent @ 16%</td><td>Fire TV</td><td>Halo âmbar atrás do elemento focado</td></tr>
+        <tr><td>Ação primária desabilitada</td><td class="mono">Ink @ 38%</td><td>Fire TV</td><td>Fundo do botão primário sem ação disponível</td></tr>
+        <tr><td>Ação circular em repouso</td><td class="mono">Elevated @ 88%</td><td>Fire TV</td><td>Botão de ícone sobre arte</td></tr>
+        <tr><td>Chip selecionado</td><td class="mono">Accent @ 12% (fundo) · @ 55% (borda)</td><td>Fire TV</td><td>Filtro ativo no catálogo</td></tr>
+        <tr><td>Trilho de progresso</td><td class="mono">Ink @ 18%</td><td>Fire TV</td><td>Barra de posição no player</td></tr>
+        <tr><td>Divisória de conta</td><td class="mono">Line @ 70%</td><td>Fire TV</td><td>Separador entre linhas de dados</td></tr>
+        <tr><td>Véu de carregamento</td><td class="mono">Background @ 82%</td><td>Fire TV</td><td>Overlay global enquanto prepara</td></tr>
+        <tr><td>Texto sobre arte</td><td class="mono">Ink @ 74% (metadados) · @ 78% (sinopse)</td><td>Fire TV</td><td>Hierarquia no hero sem trocar de token</td></tr>
+        <tr><td>Placeholder de arte</td><td class="mono">linear(Elevated → Accent @ 48%)</td><td>ambos</td><td>Gradiente enquanto a capa carrega — idêntico nas duas plataformas</td></tr>
+        <tr><td>Fundo de aviso</td><td class="mono">Warning @ 10% · Okay @ 10% · Danger @ 12%</td><td>iPhone</td><td>Caixas de aviso, sucesso e erro</td></tr>
+        <tr><td>Ícone de arquivo</td><td class="mono">Accent @ 15%</td><td>iPhone</td><td>Quadrado 34 × 34 atrás do glifo na linha de mídia</td></tr>
+        <tr><td>Pressionado</td><td class="mono">Accent @ 82% · Elevated @ 65%</td><td>iPhone</td><td>Botão primário e linha de servidor sob o dedo</td></tr>
+        <tr><td>Desabilitado</td><td class="mono">opacidade 45%</td><td>iPhone</td><td>Botão primário sem ação disponível</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Gradientes nomeados</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Nome</th><th>Definição</th><th>Onde</th></tr></thead>
+      <tbody>
+        <tr><td><b>HeroScrim topo</b><br><span class="tag ios">iPhone</span></td><td class="mono">preto 38% @0 → 16% @0.06 → 0 @0.16, vertical</td><td>Faixa curta para relógio e indicadores lerem sobre arte clara</td></tr>
+        <tr><td><b>HeroScrim base</b><br><span class="tag ios">iPhone</span></td><td class="mono">Background 0 → 100%, 13 paradas <em>smoothstep</em> a partir de 34% da altura</td><td>Dissolve a arte no fundo da tela. A curva suave existe porque poucas paradas lineares criam uma faixa de sujeira visível</td></tr>
+        <tr><td><b>HeroVeil</b><br><span class="tag tv">Fire TV</span></td><td class="mono">vertical, transparente → Background</td><td>Base do hero de 410 dp</td></tr>
+        <tr><td><b>HeroSideVeil</b><br><span class="tag tv">Fire TV</span></td><td class="mono">horizontal, Background → transparente em 72%</td><td>Lado esquerdo, para o texto do hero ler sobre o backdrop</td></tr>
+        <tr><td><b>Véu do rail</b><br><span class="tag tv">Fire TV</span></td><td class="mono">repouso: Background 96% → 82% → 0<br>com foco: Surface → Surface → 96% → 0</td><td>A navegação dissolve no conteúdo em vez de virar um painel com borda</td></tr>
+        <tr><td><b>Véu do player</b><br><span class="tag tv">Fire TV</span></td><td class="mono">vertical: transparente → Background 62% → 96%</td><td>Base dos controles sobre o vídeo</td></tr>
+        <tr><td><b>Scrim do player</b><br><span class="tag ios">iPhone</span></td><td class="mono">preto 78% → transparente → preto 88%</td><td>Topo e base dos controles sobre o vídeo</td></tr>
+        <tr><td><b>Fundo de autenticação</b><br><span class="tag ios">iPhone</span></td><td class="mono">diagonal: Background → Elevated 48% → Background</td><td>Telas de servidor e login, para não serem um bloco chapado</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Contraste medido (WCAG 2.1)</h3>
+  <p class="note">Razões calculadas sobre os hexadecimais reais dos tokens. AA para texto normal exige 4.5:1; AA para texto grande (≥ 18.66 px bold ou ≥ 24 px) exige 3:1.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Cor de texto</th><th class="mono">esc. / Background</th><th class="mono">esc. / Surface</th><th class="mono">esc. / Elevated</th><th class="mono">claro / Background</th><th class="mono">claro / Surface</th><th class="mono">claro / Elevated</th></tr></thead>
+      <tbody>
+        <tr><td><b>Ink</b></td><td class="num">17.24</td><td class="num">16.15</td><td class="num">14.75</td><td class="num">14.90</td><td class="num">15.96</td><td class="num">13.66</td></tr>
+        <tr><td><b>Muted</b></td><td class="num">7.19</td><td class="num">6.74</td><td class="num">6.16</td><td class="num">5.48</td><td class="num">5.87</td><td class="num">5.02</td></tr>
+        <tr><td><b>Accent</b></td><td class="num">7.95</td><td class="num">7.45</td><td class="num">6.80</td><td class="num">4.84</td><td class="num">5.18</td><td class="num"><b>4.43</b> ⚠</td></tr>
+        <tr><td><b>Okay</b></td><td class="num">8.60</td><td class="num">8.06</td><td class="num">7.36</td><td class="num">5.40</td><td class="num">5.78</td><td class="num">4.95</td></tr>
+        <tr><td><b>Warning</b></td><td class="num">9.17</td><td class="num">8.59</td><td class="num">7.85</td><td class="num">5.34</td><td class="num">5.72</td><td class="num">4.90</td></tr>
+        <tr><td><b>Danger</b></td><td class="num">7.05</td><td class="num">6.60</td><td class="num">6.03</td><td class="num">6.04</td><td class="num">6.47</td><td class="num">5.53</td></tr>
+        <tr><td><b>AccentInk</b> sobre Accent</td><td class="num" colspan="3">7.45</td><td class="num" colspan="3">5.18</td></tr>
+        <tr><td><b>Line</b> (contorno, não texto)</td><td class="num">1.69</td><td class="num">1.59</td><td class="num">—</td><td class="num">1.55</td><td class="num">1.66</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="rule no"><b>Única reprovação.</b> <code>Accent</code> sobre <code>Elevated</code> no tema claro dá <b>4.43:1</b> — abaixo do mínimo AA de 4.5:1 para texto normal. Hoje isso só ocorre em glifos e não em texto corrido, mas qualquer texto âmbar sobre superfície elevada no claro precisa escurecer o âmbar para aproximadamente <code>#95541F</code>.</div>
+  <div class="rule warn"><b>Contorno não é acessibilidade.</b> <code>Line</code> fica em ~1.6:1 contra o fundo em ambos os temas. Ele delimita, não comunica. Nenhum estado (selecionado, erro, foco) pode ser sinalizado só por <code>Line</code>.</div>
+</section>
+
+<!-- ============ 04 TIPOGRAFIA ============ -->
+<section id="tipografia">
+  <div class="eyebrow">04 · tipografia/</div>
+  <h2>Tipografia</h2>
+  <p class="intro">Duas estratégias distintas, por decisão. O iPhone usa <strong>San Francisco com os estilos nativos do sistema</strong>, porque isso dá Dynamic Type de graça e é o que a HIG pede. A Fire TV usa uma <strong>escala fechada de sete degraus</strong> (<code>OzyType</code>), porque não existe Dynamic Type na TV e a leitura é a três metros.</p>
+
+  <h3>Fire TV — escala <code>OzyType</code></h3>
+  <p class="note">Sete degraus fecham todas as telas de TV. Antes eram dez tamanhos avulsos sem relação entre si. Fonte: a padrão do sistema (Roboto no Fire OS). Não há fonte customizada em nenhuma plataforma.</p>
+
+  <div class="spec"><div class="sample" style="font-family:var(--sans);font-size:48px;line-height:52px;font-weight:700;letter-spacing:-.6px">Ozymandias</div><div class="facts"><b>display</b><br>48 / 52 sp<br>Bold · −0.6 sp<br>título do hero, código de pareamento</div></div>
+  <div class="spec"><div class="sample" style="font-family:var(--sans);font-size:32px;line-height:37px;font-weight:700;letter-spacing:-.4px">Catálogo</div><div class="facts"><b>title</b><br>32 / 37 sp<br>Bold · −0.4 sp<br>título de tela, título no player</div></div>
+  <div class="spec"><div class="sample" style="font-family:var(--sans);font-size:20px;line-height:25px;font-weight:500">Adicionados recentemente</div><div class="facts"><b>shelf</b><br>20 / 25 sp<br>Medium<br>título de prateleira e de seção</div></div>
+  <div class="spec"><div class="sample" style="font-family:var(--sans);font-size:17px;line-height:25px">Encontramos servidores Ozymandias na rede local.</div><div class="facts"><b>body</b><br>17 / 25 sp<br>Regular<br>subtítulo, sinopse, texto de apoio</div></div>
+  <div class="spec"><div class="sample" style="font-family:var(--sans);font-size:16px;line-height:21px;font-weight:500">Assistir · Início · Usuário</div><div class="facts"><b>label</b><br>16 / 21 sp<br>Medium<br>botão, item do rail, campo, nome de card</div></div>
+  <div class="spec"><div class="sample" style="font-family:var(--sans);font-size:14px;line-height:19px">2026 · 2 h 14 min · faltam 38 min</div><div class="facts"><b>caption</b><br>14 / 19 sp<br>Regular<br>metadado do card, tempo, erro</div></div>
+  <div class="spec"><div class="sample" style="font-family:var(--sans);font-size:13px;line-height:17px;font-weight:700;letter-spacing:1.7px">CÓDIGO DA TV</div><div class="facts"><b>meta</b><br>13 / 17 sp<br>Bold · +1.7 sp · CAIXA ALTA<br>versalete (<code>OzyEyebrow</code>), metadado do hero</div></div>
+
+  <div class="rule"><b>Regra do versalete.</b> <code>meta</code> é o único degrau que vai em caixa alta, e a caixa alta é aplicada pelo componente <code>OzyEyebrow</code>, não digitada no texto. Ele substituiu cinco tratamentos diferentes que existiam para a mesma coisa nas telas de conta, catálogo e pareamento.</div>
+
+  <h3>iPhone — estilos de texto do sistema</h3>
+  <p class="note">Nenhum tamanho fixo em pontos no conteúdo: sempre o estilo semântico, para Dynamic Type funcionar. A coluna "pt" é o tamanho no tamanho padrão (Large) — referência para maquete, não valor a codificar.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Estilo</th><th class="mono">pt @ Large</th><th>Peso usado</th><th>Onde aparece</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">largeTitle</td><td class="num">34</td><td>bold (tracking −1 na marca)</td><td>Nome do app no login, título do artista, título do hero</td></tr>
+        <tr><td class="mono">title</td><td class="num">28</td><td>bold</td><td>"Conectar uma TV"</td></tr>
+        <tr><td class="mono">title2</td><td class="num">22</td><td>semibold</td><td>Títulos de tela de autenticação, "Servidor indisponível", campo de código (monoespaçado)</td></tr>
+        <tr><td class="mono">title3</td><td class="num">20</td><td>semibold / bold</td><td>Nome do título no detalhe, valor de métrica, "Preparando para este iPhone"</td></tr>
+        <tr><td class="mono">headline</td><td class="num">17</td><td>semibold (implícito)</td><td>Título de prateleira, título de linha de navegação, nome de coleção</td></tr>
+        <tr><td class="mono">body</td><td class="num">17</td><td>regular</td><td>Texto corrido, sinopse</td></tr>
+        <tr><td class="mono">subheadline</td><td class="num">15</td><td>regular / medium / semibold</td><td>Nome de card, título do mini player, rótulo de dado, botão do hero</td></tr>
+        <tr><td class="mono">caption</td><td class="num">12</td><td>regular / medium / semibold / bold</td><td>Metadado, ano, rótulo de campo, chip, tempo (com <code>monospacedDigit</code>)</td></tr>
+        <tr><td class="mono">caption2</td><td class="num">11</td><td>regular / semibold</td><td>Terceiro nível: detalhe de métrica, número de faixa</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>Tamanhos fixos permitidos no iPhone</h4>
+  <p class="note">Só em ícone e controle — onde o tamanho é geometria, não leitura. Ícone que cresce com Dynamic Type quebra a área de toque de 44 pt.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="mono">Tamanho</th><th>Onde</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">54 pt medium</td><td>Ícone <code>tv.and.mediabox</code> no topo do pareamento</td></tr>
+        <tr><td class="mono">30 pt semibold</td><td>Play/pause central do player (área 68 × 68)</td></tr>
+        <tr><td class="mono">17 pt semibold</td><td>Ícones de barra: fechar, PiP, AirPlay, legendas, alternador de aparência (área 44 × 44)</td></tr>
+        <tr><td class="mono">15 pt semibold</td><td>Glifo de arquivo na linha de mídia (quadro 34 × 34)</td></tr>
+        <tr><td class="mono">13 / 11 pt bold</td><td>Play/pause e fechar do mini player; play em círculo de 28</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Equivalência entre plataformas</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Papel</th><th>iPhone</th><th>Fire TV</th></tr></thead>
+      <tbody>
+        <tr><td>Título de hero</td><td class="mono">largeTitle bold, 2 linhas, escala mín. 0.72</td><td class="mono">display, 2 linhas, reticências</td></tr>
+        <tr><td>Título de tela</td><td class="mono">navigationTitle (largeTitle)</td><td class="mono">title</td></tr>
+        <tr><td>Título de prateleira</td><td class="mono">headline</td><td class="mono">shelf</td></tr>
+        <tr><td>Nome no card</td><td class="mono">subheadline medium, 2 linhas reservadas</td><td class="mono">label, 1 linha</td></tr>
+        <tr><td>Metadado do card</td><td class="mono">caption + Muted</td><td class="mono">caption + Muted</td></tr>
+        <tr><td>Linha de metadados do hero</td><td class="mono">caption semibold, tracking 0.7, branco 78%</td><td class="mono">meta, Ink 74%</td></tr>
+        <tr><td>Rótulo de botão</td><td class="mono">subheadline semibold</td><td class="mono">label</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>Regras de quebra e truncamento</h4>
+  <ul class="plain">
+    <li><strong>Card de pôster no iPhone reserva duas linhas</strong> para o nome (<code>lineLimit(2, reservesSpace: true)</code>). Sem isso, uma célula de uma linha fica mais baixa e o ano desalinha em relação à vizinha na grade.</li>
+    <li><strong>Título de hero encolhe até 72%</strong> antes de quebrar em uma terceira linha; a linha de metadados encolhe até 80%.</li>
+    <li><strong>Nome de arquivo de filme é uma linha; de série, duas</strong> — nome de filme é longo e a altura da célula precisa ficar estável.</li>
+    <li><strong>Números que se alinham em coluna usam <code>monospacedDigit</code></strong> (tempo, porcentagem, métricas). Na TV, o relógio do player e a duração usam a mesma disciplina.</li>
+    <li><strong>Nunca aplicar caixa alta na linha inteira de metadados:</strong> "2 h" viraria "2 H". Quem escreve maiusculiza só o tipo de mídia.</li>
+  </ul>
+</section>
+
+<!-- ============ 05 ESPAÇO ============ -->
+<section id="espaco">
+  <div class="eyebrow">05 · espaco/</div>
+  <h2>Espaço e grid</h2>
+  <p class="intro">Duas grades independentes. O iPhone trabalha em 16 pt de margem lateral com uma escala de 3–4 pt; a TV trabalha em 56 dp de margem com uma escala mais folgada e uma faixa reservada de foco.</p>
+
+  <h3>Fire TV — <code>OzyTvTokens</code></h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Token</th><th class="mono">Valor</th><th>Significado</th></tr></thead>
+      <tbody>
+        <tr><td><code>gutter</code></td><td class="num">56 dp</td><td>Margem lateral única de toda tela de TV</td></tr>
+        <tr><td><code>railCollapsed</code></td><td class="num">82 dp</td><td>Largura do rail em repouso — é também o padding esquerdo do conteúdo</td></tr>
+        <tr><td><code>railExpanded</code></td><td class="num">210 dp</td><td>Largura do rail com foco (troca instantânea, sem animar largura)</td></tr>
+        <tr><td><code>focusInset</code></td><td class="num">6 dp</td><td>Faixa reservada em volta do card para o halo de foco não ser cortado</td></tr>
+        <tr><td><code>cardGap</code></td><td class="num">16 dp</td><td>Espaço visual entre cards (o real subtrai 2 × focusInset)</td></tr>
+        <tr><td><code>sectionGap</code></td><td class="num">26 dp</td><td>Espaço entre prateleiras</td></tr>
+        <tr><td><code>heroHeight</code></td><td class="num">410 dp</td><td>76% da altura útil: sobra uma faixa da primeira prateleira, que é o convite para descer</td></tr>
+        <tr><td><code>detailHeroHeight</code></td><td class="num">320 dp</td><td>Hero da tela de detalhe</td></tr>
+        <tr><td><code>posterArt</code></td><td class="num">144 × 216 dp</td><td>Arte do pôster (2:3). Card total: 156 dp com a faixa de foco</td></tr>
+        <tr><td><code>landscapeArt</code></td><td class="num">256 × 144 dp</td><td>Arte deitada (16:9). Card total: 268 dp</td></tr>
+        <tr><td><code>ShelfEdge</code></td><td class="num">50 dp</td><td class="mono">gutter − focusInset — alinha a arte do primeiro card à margem</td></tr>
+        <tr><td><code>CardSpacing</code></td><td class="num">4 dp</td><td class="mono">cardGap − 2 × focusInset — o espaço real entre caixas, já que cada card carrega 6 dp de cada lado</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="rule"><b>Por que a matemática do <code>focusInset</code> importa.</b> Cada card reserva 6 dp em volta de si. Para a arte do primeiro card encostar na margem de 56 dp, o padding da lista é 50. Para o vão visual entre artes ser 16, o <code>spacing</code> da lista é 4. Ao redesenhar cards, mantenha essa contabilidade ou o alinhamento das prateleiras quebra.</div>
+
+  <h4>Espaçamentos verticais na TV</h4>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="mono">Valor</th><th>Uso</th></tr></thead>
+      <tbody>
+        <tr><td class="num">10 dp</td><td>Título da prateleira → primeira fila de cards</td></tr>
+        <tr><td class="num">12 dp</td><td>Blocos do texto do hero</td></tr>
+        <tr><td class="num">14 dp</td><td>Grade do catálogo (vertical), itens do split shell</td></tr>
+        <tr><td class="num">26 dp</td><td>Entre prateleiras (<code>sectionGap</code>)</td></tr>
+        <tr><td class="num">30 / 34 dp</td><td>Padding vertical do rail e do split shell</td></tr>
+        <tr><td class="num">40 dp</td><td>Base do conteúdo do hero</td></tr>
+        <tr><td class="num">46 / 50 dp</td><td>Respiro final da lista (evita o último card colado na borda)</td></tr>
+        <tr><td class="num">56 dp</td><td>Vão entre as duas colunas do <code>OzySplitShell</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>iPhone — grade e margens</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="mono">Valor</th><th>Uso</th></tr></thead>
+      <tbody>
+        <tr><td class="num">16 pt</td><td><b>Margem lateral canônica</b> de prateleiras, grades, títulos de seção e cartões</td></tr>
+        <tr><td class="num">20 pt</td><td>Conteúdo do banner (texto e ações sobre a arte) e do Perfil</td></tr>
+        <tr><td class="num">22 pt</td><td>Base do conteúdo do banner</td></tr>
+        <tr><td class="num">24 pt</td><td>Padding de telas centradas (pareamento, estados de falha)</td></tr>
+        <tr><td class="num">30 pt</td><td>Entre blocos da Home (banner, "Continuar assistindo", prateleiras)</td></tr>
+        <tr><td class="num">22 pt</td><td>Entre linhas da grade do acervo e entre blocos do detalhe</td></tr>
+        <tr><td class="num">16 pt</td><td>Colunas da grade do acervo</td></tr>
+        <tr><td class="num">14 pt</td><td>Entre cards de uma prateleira horizontal</td></tr>
+        <tr><td class="num">12 pt</td><td>Entre título de prateleira e cards</td></tr>
+        <tr><td class="num">7 pt</td><td>Entre a arte e o nome dentro de um card</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>Larguras fixas no iPhone</h4>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="mono">Medida</th><th>Elemento</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">128 pt</td><td>Card de pôster na prateleira horizontal</td></tr>
+        <tr><td class="mono">220 × 124 pt</td><td>Card de "Continuar assistindo" (arte deitada)</td></tr>
+        <tr><td class="mono">108–170 pt</td><td>Coluna adaptativa da grade do acervo (o sistema decide quantas cabem)</td></tr>
+        <tr><td class="mono">32 × 32 pt</td><td>Miniatura do mini player</td></tr>
+        <tr><td class="mono">34 × 34 pt</td><td>Quadro do glifo na linha de arquivo</td></tr>
+        <tr><td class="mono">520 / 560 pt</td><td>Largura máxima de conteúdo em Perfil e Pareamento</td></tr>
+        <tr><td class="mono">420 pt</td><td>Largura máxima do estado de falha de restauração</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>Alturas mínimas de controle (iPhone)</h4>
+  <ul class="plain">
+    <li><strong>50 pt</strong> — campo de texto e botão primário. Confortável para o polegar, acima do mínimo da HIG.</li>
+    <li><strong>44 × 44 pt</strong> — todo botão de ícone. Mínimo absoluto da HIG; não descer disso em nenhuma hipótese.</li>
+    <li><strong>62 pt</strong> — altura mínima da linha de arquivo de mídia, que é uma linha tocável.</li>
+    <li><strong>36 pt</strong> — chip de filtro (alvo pequeno, mas em fila horizontal com espaçamento generoso).</li>
+  </ul>
+</section>
+
+<!-- ============ 06 FORMA ============ -->
+<section id="forma">
+  <div class="eyebrow">06 · forma/</div>
+  <h2>Forma e elevação</h2>
+  <p class="intro">A linguagem de forma é de cantos generosos e contorno de 1. Não há sombra em nenhum elemento de conteúdo — profundidade vem de superfície (Background → Surface → Elevated) e, na TV, de foco.</p>
+
+  <h3>Raios</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="mono">Raio</th><th>Plataforma</th><th>Onde</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">6 pt</td><td>iPhone</td><td>Miniatura do mini player; caixa de mensagem sobre o vídeo</td></tr>
+        <tr><td class="mono">9 pt</td><td>iPhone</td><td>Quadro do glifo de arquivo</td></tr>
+        <tr><td class="mono">10 pt</td><td>iPhone</td><td>Banner de erro do login</td></tr>
+        <tr><td class="mono">11 pt</td><td>iPhone</td><td><b>Controles:</b> campo de texto, botão primário, linha de servidor</td></tr>
+        <tr><td class="mono">12 pt</td><td>iPhone</td><td><b>Arte:</b> pôster, card deitado; e caixas de aviso</td></tr>
+        <tr><td class="mono">16 pt</td><td>iPhone</td><td><b>Cartão</b> (<code>ozyCard</code>): painel de dados, lista de arquivos, blocos do Perfil</td></tr>
+        <tr><td class="mono">14 dp</td><td>Fire TV</td><td>Item do rail de navegação</td></tr>
+        <tr><td class="mono">16 dp</td><td>Fire TV</td><td><code>cardRadius</code> — cards, campos, painel de erro</td></tr>
+        <tr><td class="mono">22 dp</td><td>Fire TV</td><td><code>panelRadius</code> — painéis, QR code, e o halo de foco</td></tr>
+        <tr><td>Cápsula</td><td>ambos</td><td>Todo botão de texto, chip, barra de progresso e ação circular</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="rule"><b>Cantos concêntricos na TV.</b> <code>panelRadius</code> (22) = <code>cardRadius</code> (16) + <code>focusInset</code> (6). O halo de foco tem o raio do painel e o card tem o raio do card, então os cantos ficam concêntricos e o foco parece envolver o card, não emoldurá-lo.</div>
+
+  <h3>Contorno e divisórias</h3>
+  <ul class="plain">
+    <li><strong>1 px/dp em <code>Line</code></strong> é o único contorno do sistema. Aparece em cartão, campo, chip não selecionado, arte de pôster e painel.</li>
+    <li><strong>Arte de pôster tem contorno</strong> no iPhone — sem ele, capas escuras somem no fundo escuro.</li>
+    <li><strong>Divisória interna</strong> é <code>Divider</code> tingido de <code>Line</code>, recuado 60 pt à esquerda quando a linha tem ícone (alinha com o texto, não com a borda).</li>
+    <li><strong>Na TV</strong>, divisória é uma caixa de 1 dp em <code>Line @ 70%</code>.</li>
+  </ul>
+
+  <h3>Elevação</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Nível</th><th>Como se expressa</th><th>Uso</th></tr></thead>
+      <tbody>
+        <tr><td><b>0 — piso</b></td><td><code>Background</code></td><td>Fundo de tela</td></tr>
+        <tr><td><b>1 — superfície</b></td><td><code>Surface</code> + contorno <code>Line</code></td><td>Cartão, painel, campo em repouso</td></tr>
+        <tr><td><b>2 — elevado</b></td><td><code>Elevated</code> + contorno <code>Line</code></td><td>Campo com foco, botão secundário, linha de servidor</td></tr>
+        <tr><td><b>3 — foco (só TV)</b></td><td>escala 1.06 + halo âmbar + sombra 18 dp + anel <code>Ink</code> 2 dp</td><td>O elemento sob o D-pad. Único uso de sombra no sistema</td></tr>
+        <tr><td><b>Sobreposto</b></td><td>Véu de <code>Background @ 82%</code> (TV) ou material do sistema (iPhone)</td><td>Carregamento global, alternador de aparência flutuante</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 07 ÍCONES ============ -->
+<section id="icones">
+  <div class="eyebrow">07 · icones/</div>
+  <h2>Iconografia</h2>
+  <p class="intro">O iPhone usa SF Symbols — a biblioteca completa da Apple, com peso semibold e alinhamento óptico do sistema. A Fire TV <strong>não tem biblioteca de ícones</strong>: os onze glifos usados são desenhados por código em <code>OzyIcon</code>, com traço de 2.2 dp e ponta arredondada.</p>
+
+  <h3>Conjunto <code>OzyGlyph</code> — Fire TV (11 glifos)</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Glifo</th><th>Construção</th><th>Onde</th><th>SF Symbol equivalente no iPhone</th></tr></thead>
+      <tbody>
+        <tr><td><b>HOME</b></td><td>Traçado de casa aberto embaixo</td><td>Rail · Início</td><td class="mono">house.fill</td></tr>
+        <tr><td><b>GRID</b></td><td>Quatro quadrados de canto 2 dp</td><td>Rail · Catálogo</td><td class="mono">rectangle.grid.2x2.fill</td></tr>
+        <tr><td><b>USER</b></td><td>Círculo + arco de 130°</td><td>Rail · Conta, login</td><td class="mono">person.crop.circle</td></tr>
+        <tr><td><b>PLAY</b></td><td>Triângulo preenchido</td><td>Ação primária, sobreposição de card</td><td class="mono">play.fill</td></tr>
+        <tr><td><b>PAUSE</b></td><td>Duas barras, canto 1.5 dp</td><td>Player</td><td class="mono">pause.fill</td></tr>
+        <tr><td><b>INFO</b></td><td>Círculo + haste + ponto</td><td>Ação secundária de detalhe</td><td class="mono">info.circle</td></tr>
+        <tr><td><b>SERVER</b></td><td>Retângulo + linha + LED</td><td>Conexão, dado de servidor</td><td class="mono">server.rack</td></tr>
+        <tr><td><b>WIFI</b></td><td>Dois arcos + ponto</td><td>Servidor descoberto na rede</td><td class="mono">wifi</td></tr>
+        <tr><td><b>SEARCH</b></td><td>Círculo + cabo</td><td>Campo de busca do catálogo</td><td class="mono">magnifyingglass</td></tr>
+        <tr><td><b>LOGOUT</b></td><td>Arco de 220° + seta</td><td>Sair da conta</td><td class="mono">rectangle.portrait.and.arrow.right</td></tr>
+        <tr><td><b>CLOCK</b></td><td>Círculo + dois ponteiros</td><td>Validade de sessão, servidor recente</td><td class="mono">calendar.badge.clock</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>Tamanhos de glifo na TV</h4>
+  <ul class="plain">
+    <li><strong>20 dp</strong> — dentro de quadros pequenos (linha de servidor, linha de conta, card).</li>
+    <li><strong>22 dp</strong> — em botões e itens do rail.</li>
+    <li><strong>24 dp</strong> — padrão do componente <code>OzyIcon</code>.</li>
+  </ul>
+
+  <h3>SF Symbols em uso — iPhone</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Contexto</th><th class="mono">Símbolos</th></tr></thead>
+      <tbody>
+        <tr><td>Abas</td><td class="mono">house.fill · rectangle.grid.2x2.fill · rectangle.stack.fill · music.mic · person.crop.circle</td></tr>
+        <tr><td>Reprodução</td><td class="mono">play.fill · pause.fill · gobackward.10 · goforward.10 · forward.end.fill</td></tr>
+        <tr><td>Player</td><td class="mono">chevron.down · pip.enter · pip.exit · captions.bubble · xmark</td></tr>
+        <tr><td>Estado</td><td class="mono">checkmark.seal.fill · checkmark.circle.fill · checkmark.circle · exclamationmark.triangle.fill · wifi.exclamationmark · clock.badge.exclamationmark</td></tr>
+        <tr><td>Conta e servidor</td><td class="mono">person · person.badge.key · server.rack · gearshape.fill · key.fill · calendar.badge.clock · eye · eye.slash</td></tr>
+        <tr><td>TV</td><td class="mono">tv.and.mediabox · qrcode.viewfinder</td></tr>
+        <tr><td>Navegação e ordenação</td><td class="mono">chevron.right · arrow.up.arrow.down · arrow.uturn.backward</td></tr>
+        <tr><td>Conteúdo</td><td class="mono">music.note · circle.lefthalf.filled · moon.fill · sun.max.fill</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="rule warn"><b>Assimetria a resolver.</b> O iPhone usa ~30 símbolos; a TV tem 11 glifos. Toda função nova na TV exige desenhar um glifo em código. Ao propor telas novas de TV, verifique se o glifo existe — caso contrário, ele entra como item de trabalho de design (vetor em grade quadrada, traço 2.2, ponta arredondada).</div>
+</section>
+
+<!-- ============ 08 ARTE ============ -->
+<section id="arte">
+  <div class="eyebrow">08 · arte/</div>
+  <h2>Arte e imagem</h2>
+  <p class="intro">Toda arte vem do servidor autenticada por token; nenhuma imagem é empacotada no app além do ícone. As proporções são fixas e iguais nas duas plataformas.</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Tipo</th><th>Proporção</th><th class="mono">Pedido ao servidor</th><th>Onde</th></tr></thead>
+      <tbody>
+        <tr><td><b>Pôster</b></td><td>2 : 3</td><td>328 × 492 px (TV) · lado máx. 400 px (iPhone)</td><td>Prateleiras, grade do acervo, coleções</td></tr>
+        <tr><td><b>Deitada</b></td><td>16 : 9</td><td>640 × 360 px</td><td>Cards de "Continuar assistindo"</td></tr>
+        <tr><td><b>Backdrop</b></td><td>16 : 9</td><td>1280 × 720 px</td><td>Hero da Home e do detalhe</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Placeholder — o mesmo nos dois apps</h3>
+  <p class="note">Enquanto a capa carrega, e quando não existe capa, o espaço recebe um gradiente diagonal de <code>Elevated</code> para <code>Accent @ 48%</code>. Um retângulo chapado deixava buracos escuros na grade.</p>
+  <ul class="plain">
+    <li><strong>Sem arte, com nome (iPhone):</strong> sobre o gradiente, as <strong>iniciais</strong> do título em <code>title2 bold</code>, <code>Ink @ 72%</code> — até duas letras.</li>
+    <li><strong>Sem arte (Fire TV):</strong> sobre o gradiente, a <strong>marca</strong> centralizada — 44 dp em pôster, 60 dp em backdrop.</li>
+    <li><strong>Recorte:</strong> sempre <code>Crop</code> centralizado; a arte nunca é distorcida nem exibida com barras.</li>
+  </ul>
+
+  <h3>Legibilidade sobre arte</h3>
+  <ul class="plain">
+    <li>Texto sobre arte é <strong>sempre branco no iPhone</strong> (exceção à regra do branco puro: sobre foto, o branco funciona e o sépia não) e <strong><code>Ink</code> na TV</strong>, sempre com véu abaixo.</li>
+    <li>Nenhum texto sobre arte sem véu. O <code>HeroScrim</code> (iPhone) e o <code>HeroVeil</code>/<code>HeroSideVeil</code> (TV) são obrigatórios, não decorativos.</li>
+    <li>O caso de teste do sistema é <strong>arte clara</strong> — céu, mar e areia com sol forte. Toda proposta de sobreposição precisa ser validada contra uma capa clara, não contra uma escura.</li>
+  </ul>
+</section>
+
+<!-- ============ 09 COMPONENTES iOS ============ -->
+<section id="comp-ios">
+  <div class="eyebrow">09 · componentes/iphone</div>
+  <h2>Componentes — iPhone</h2>
+  <p class="intro">Especificação de cada componente que existe hoje. "Anatomia" descreve a construção; "Estados" lista o que muda em uso.</p>
+
+  <h3>Ações</h3>
+  <div class="cards">
+    <div class="card">
+      <h5>Botão primário <span class="tag ios">iPhone</span></h5>
+      <p class="path">PrimaryButtonStyle · LoginView.swift</p>
+      <dl>
+        <dt>Forma</dt><dd>Retângulo, raio 11, largura total do container</dd>
+        <dt>Altura</dt><dd>mínimo 50 pt</dd>
+        <dt>Cor</dt><dd>Fundo <code>Accent</code>, texto <code>AccentInk</code> semibold</dd>
+        <dt>Pressionado</dt><dd>Fundo <code>Accent @ 82%</code> + escala 0.99</dd>
+        <dt>Desabilitado</dt><dd>Opacidade 45%</dd>
+        <dt>Carregando</dt><dd><code>ProgressView</code> tingido de <code>AccentInk</code> + rótulo muda ("Entrando…")</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Botão de assistir (hero) <span class="tag ios">iPhone</span></h5>
+      <p class="path">HeroPlayButton · HeroBanner.swift</p>
+      <dl>
+        <dt>Estilo</dt><dd><code>.glassProminent</code>, cápsula, <code>controlSize .large</code></dd>
+        <dt>Cor</dt><dd>Tint <strong>branco</strong>, conteúdo preto — neutro sobre arte colorida, por HIG</dd>
+        <dt>Medidas</dt><dd>Largura mínima 122, altura mínima 26 (+ padding do estilo), padding lateral 6</dd>
+        <dt>Conteúdo</dt><dd>Ícone <code>play.fill</code> (subheadline bold) + rótulo (subheadline semibold), vão 6</dd>
+        <dt>Ocupado</dt><dd>Ícone vira <code>ProgressView</code> pequeno preto; botão desabilita</dd>
+        <dt>Rótulo</dt><dd>"Assistir" · "Tocar" (áudio) · "Continuar" (posição &gt; 5 s e não terminado)</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Ação circular do hero <span class="tag ios">iPhone</span></h5>
+      <p class="path">heroIconButtonStyle() + HeroIconLabel</p>
+      <dl>
+        <dt>Estilo</dt><dd><code>.glass</code>, forma círculo, tint branco</dd>
+        <dt>Alvo</dt><dd>44 × 44 pt, ícone 17 pt semibold</dd>
+        <dt>Agrupamento</dt><dd>Dentro de <code>GlassEffectContainer</code> com vão 10 — vidro não amostra vidro; elementos vizinhos em containers diferentes renderizam inconsistente</dd>
+        <dt>Fila típica</dt><dd>1 cápsula + até 3 círculos, dentro da largura do iPhone</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Botões do sistema <span class="tag ios">iPhone</span></h5>
+      <p class="path">.borderedProminent · .bordered · .plain</p>
+      <dl>
+        <dt>borderedProminent</dt><dd>Ação de recuperação e confirmação em tela cheia: "Tentar novamente", "Escanear QR Code"</dd>
+        <dt>bordered</dt><dd>Ação secundária: "Sair", "Entrar com outra conta", "Autorizar TV" — sempre <code>controlSize .large</code></dd>
+        <dt>plain</dt><dd>Todo card, linha e célula tocável (o card já é o alvo; um estilo de botão duplicaria a moldura)</dd>
+        <dt>Tint global</dt><dd><code>.tint(.ozAccent)</code> na raiz — todo controle do sistema herda o âmbar</dd>
+      </dl>
+    </div>
+  </div>
+
+  <h3>Entrada de dados</h3>
+  <div class="cards">
+    <div class="card">
+      <h5>Campo de texto <span class="tag ios">iPhone</span></h5>
+      <p class="path">OzymandiasTextFieldStyle</p>
+      <dl>
+        <dt>Forma</dt><dd>Raio 11, fundo <code>Elevated</code>, contorno <code>Line</code> 1 pt</dd>
+        <dt>Altura</dt><dd>mínimo 50 pt · padding lateral 12</dd>
+        <dt>Ícone</dt><dd>Opcional à esquerda, cor <code>Muted</code>, vão 10</dd>
+        <dt>Rótulo</dt><dd>Externo, acima: <code>caption semibold</code></dd>
+        <dt>Senha</dt><dd>Mesmo container com botão <code>eye</code>/<code>eye.slash</code> de 44 × 44 à direita</dd>
+        <dt>Código de TV</dt><dd>Variante centralizada, <code>title2</code> monoespaçado, raio 12, fundo <code>Surface</code></dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Chip de filtro <span class="tag ios">iPhone</span></h5>
+      <p class="path">FilterChip · HomeCatalogView.swift</p>
+      <dl>
+        <dt>Forma</dt><dd>Cápsula, altura mínima 36, padding lateral 13</dd>
+        <dt>Repouso</dt><dd>Fundo <code>Surface</code>, contorno <code>Line</code>, texto <code>Ink</code></dd>
+        <dt>Selecionado</dt><dd>Fundo e contorno <code>Accent</code>, texto <code>AccentInk</code></dd>
+        <dt>Tipo</dt><dd><code>caption semibold</code></dd>
+        <dt>Regra</dt><dd>Com uma única biblioteca, a fila inteira some — "Tudo" e o nome dela dariam o mesmo resultado</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Chip de metadado <span class="tag ios">iPhone</span></h5>
+      <p class="path">MetaChip</p>
+      <dl>
+        <dt>Forma</dt><dd>Cápsula, padding 11 × 6</dd>
+        <dt>Cor</dt><dd>Fundo <code>Surface</code>, contorno <code>Line</code>, texto <code>Muted</code></dd>
+        <dt>Natureza</dt><dd>Informativo, <b>não tocável</b> — não usar vidro nem âmbar aqui</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Seletor de aparência <span class="tag ios">iPhone</span></h5>
+      <p class="path">Picker .segmented · ProfileView</p>
+      <dl>
+        <dt>Opções</dt><dd>Escuro · Claro · Sistema</dd>
+        <dt>Rótulo</dt><dd><code>Label</code> "Aparência" com <code>circle.lefthalf.filled</code>, <code>caption</code> em <code>Muted</code></dd>
+        <dt>Container</dt><dd>Dentro de um <code>ozyCard</code></dd>
+      </dl>
+    </div>
+  </div>
+
+  <h3>Contêineres e listas</h3>
+  <div class="cards">
+    <div class="card">
+      <h5>Cartão <span class="tag ios">iPhone</span></h5>
+      <p class="path">.ozyCard() · OzymandiasTheme.swift</p>
+      <dl>
+        <dt>Definição</dt><dd>padding 16 · fundo <code>Surface</code> raio 16 · contorno <code>Line</code> 1</dd>
+        <dt>Uso</dt><dd>Painel de dados do Perfil, formulário de login, lista de arquivos, blocos do painel do servidor</dd>
+        <dt>Aninhamento</dt><dd>Um card nunca contém outro card. Listas dentro do card são separadas por <code>Divider</code></dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Card de pôster <span class="tag ios">iPhone</span></h5>
+      <p class="path">PosterTile</p>
+      <dl>
+        <dt>Arte</dt><dd>Proporção 2:3, raio 12, contorno <code>Line</code></dd>
+        <dt>Nome</dt><dd><code>subheadline medium</code>, <b>2 linhas reservadas</b> mesmo se couber em 1</dd>
+        <dt>Terceira linha</dt><dd>Ano, ou o tipo de mídia quando não há ano — <code>caption</code> em <code>Muted</code></dd>
+        <dt>Vão interno</dt><dd>7 pt</dd>
+        <dt>Alvo</dt><dd>O card inteiro; identificador <code>titleCard-{id}</code></dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Card de "Continuar" <span class="tag ios">iPhone</span></h5>
+      <p class="path">ContinueShelf</p>
+      <dl>
+        <dt>Arte</dt><dd>220 × 124 pt, raio 12</dd>
+        <dt>Sobreposição</dt><dd>Botão de play centralizado (padding 13) + barra de progresso de 4 pt na base</dd>
+        <dt>Progresso</dt><dd>Cápsula branca sobre a arte; largura = fração assistida</dd>
+        <dt>Texto</dt><dd>Nome + "faltam N min", largura travada em 220 pt</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Linha de arquivo de mídia <span class="tag ios">iPhone</span></h5>
+      <p class="path">MediaFileRow</p>
+      <dl>
+        <dt>Altura</dt><dd>mínimo 62 pt · padding 14 × 11</dd>
+        <dt>Esquerda</dt><dd>Glifo em quadro 34 × 34, raio 9, fundo <code>Accent @ 15%</code>, ícone <code>Accent</code></dd>
+        <dt>Centro</dt><dd>Nome (1 linha; 2 em série) + linha secundária "Faixa · duração · qualidade · extensão"</dd>
+        <dt>Direita</dt><dd>Assistido: <code>checkmark.circle.fill</code> em <code>Okay</code> · Parcial: "NN%" em <code>Muted</code> · sempre um play em círculo <code>Accent</code> 28 × 28</dd>
+        <dt>Progresso</dt><dd>Barra de 3 pt recuada 46 pt, trilho <code>Line</code>, preenchimento <code>Accent</code></dd>
+        <dt>Menu de contexto</dt><dd>Marcar como (não) assistido — também exposto como ação de acessibilidade</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Banner de hero <span class="tag ios">iPhone</span></h5>
+      <p class="path">HeroBanner + HeroScrim</p>
+      <dl>
+        <dt>Altura</dt><dd>largura × 1.16, limitada a 380–640 pt</dd>
+        <dt>Sangria</dt><dd>Passa por trás da status bar e da Dynamic Island</dd>
+        <dt>Elástico</dt><dd>Ao puxar, escala 1 + min(puxada, 260)/900 ancorada na base — acompanha o dedo 1:1, sem animação</dd>
+        <dt>Conteúdo</dt><dd>Ancorado embaixo-esquerda: metadados → título → fila de ações. Padding 20 lateral, 22 base</dd>
+        <dt>Reduzir movimento</dt><dd>Elástico desligado</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Mini player <span class="tag ios">iPhone</span></h5>
+      <p class="path">MiniPlayerBar · tabViewBottomAccessory</p>
+      <dl>
+        <dt>Posição</dt><dd>Acessório do iOS 26 acima da tab bar; acompanha a minimização ao rolar</dd>
+        <dt>Anatomia</dt><dd>Miniatura 32 (raio 6) · título + subtítulo · play/pause 32 · fechar 32</dd>
+        <dt>Subtítulo</dt><dd>Reflete a fase: "Preparando · N%", "Carregando…", "Não foi possível reproduzir", ou o rótulo do episódio</dd>
+        <dt>Toque</dt><dd>Texto abre o player em tela cheia; "×" encerra a reprodução (fechar o player não encerra)</dd>
+        <dt>Aparece quando</dt><dd>Há item carregado — inclusive depois de fechar o player</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Alternador de aparência <span class="tag ios">iPhone</span></h5>
+      <p class="path">AppearanceToggle · RootView</p>
+      <dl>
+        <dt>Forma</dt><dd>Círculo 44 × 44, fundo <code>.thinMaterial</code>, contorno <code>Line</code></dd>
+        <dt>Ícone</dt><dd><code>moon.fill</code> ↔ <code>sun.max.fill</code>, cor <code>Accent</code>, transição <code>symbolEffect(.replace)</code></dd>
+        <dt>Onde</dt><dd><b>Só</b> nas telas sem barra de navegação (deslogado, falha). No app autenticado ele cairia sobre os itens da barra e roubaria o toque — lá o controle mora no Perfil</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Banner de erro <span class="tag ios">iPhone</span></h5>
+      <p class="path">ErrorBanner</p>
+      <dl>
+        <dt>Forma</dt><dd>Raio 10, padding 12, fundo <code>Danger @ 12%</code></dd>
+        <dt>Conteúdo</dt><dd><code>Label</code> com <code>exclamationmark.triangle.fill</code>, texto <code>caption</code> em <code>Danger</code>, alinhado à esquerda</dd>
+        <dt>Variantes</dt><dd>Aviso: mesma forma com <code>Warning @ 10%</code> e raio 12 · Sucesso: <code>Okay @ 10%</code>, raio 16</dd>
+      </dl>
+    </div>
+  </div>
+
+  <h3>Player em tela cheia</h3>
+  <div class="cards">
+    <div class="card">
+      <h5>Barra superior</h5>
+      <dl>
+        <dt>Itens</dt><dd>Fechar (<code>chevron.down</code>) · título + episódio · AirPlay · PiP · menu de faixas</dd>
+        <dt>Alvos</dt><dd>44 × 44, fundo <code>preto @ 55%</code> em círculo</dd>
+        <dt>Padding</dt><dd>14 lateral, 8 topo</dd>
+        <dt>Semântica</dt><dd>Fechar devolve a tela; <b>não</b> encerra a reprodução</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Controles centrais</h5>
+      <dl>
+        <dt>Itens</dt><dd>−10 s · play/pause · +10 s, vão 42</dd>
+        <dt>Play</dt><dd>68 × 68, ícone 30 pt semibold, fundo <code>preto @ 55%</code></dd>
+        <dt>Laterais</dt><dd>44 × 44, mesmo fundo</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Controles inferiores</h5>
+      <dl>
+        <dt>Slider</dt><dd>Nativo, tint <code>Accent</code>; valor de acessibilidade em "M de N"</dd>
+        <dt>Tempos</dt><dd>Decorrido e restante ("−h:mm:ss") em <code>caption monospacedDigit</code>; restante em branco 65%</dd>
+        <dt>Direita</dt><dd>Menu de velocidade (0.5×–2×, alvo mín. 42 × 36) e "Próximo" quando há episódio seguinte</dd>
+        <dt>Erro</dt><dd>Linha em <code>Danger</code>, <code>caption</code>, alinhada à esquerda</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Estado de preparação</h5>
+      <dl>
+        <dt>Quando</dt><dd>O servidor está transcodificando para este iPhone</dd>
+        <dt>Anatomia</dt><dd>Barra de progresso (máx. 320) · "Preparando para este iPhone" (<code>title3 semibold</code>) · "N%" · motivo</dd>
+        <dt>Regra</dt><dd>Nunca mostrar play antes de estar pronto — o mini player diz "Preparando · N%"</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10 COMPONENTES TV ============ -->
+<section id="comp-tv">
+  <div class="eyebrow">10 · componentes/firetv</div>
+  <h2>Componentes — Fire TV</h2>
+  <p class="intro">Todos vivem em <code>DesignSystem.kt</code>. A regra que os une: escala, halo e captura de foco moram num lugar só (<code>ActionShell</code>), para botão, chip e ação circular reagirem exatamente igual ao D-pad.</p>
+
+  <div class="focusdemo">
+    <div class="poster">
+      <div class="art"></div>
+      <div class="t">Em repouso</div><div class="y">sem borda</div>
+    </div>
+    <div class="poster focused">
+      <div class="art"></div>
+      <div class="t">Com foco</div><div class="y">1.06 · anel · halo</div>
+    </div>
+    <div style="color:#A99A84;font-size:13px;max-width:34ch;line-height:1.6">
+      O halo mora numa faixa reservada de 6 dp, então nunca é cortado pela lista e o layout não pula quando o foco chega.
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h5>OzyFocusFrame <span class="tag tv">Fire TV</span></h5>
+      <p class="path">envelope de foco de todo card</p>
+      <dl>
+        <dt>Repouso</dt><dd>Nenhuma borda, nenhuma sombra, escala 1</dd>
+        <dt>Foco</dt><dd>Escala 1.06 · halo <code>Accent @ 16%</code> em raio 22 · padding 6 · sombra 18 dp · anel <code>Ink @ 94%</code> de 2 dp em raio 16</dd>
+        <dt>Transição</dt><dd>140 ms em escala e cor do halo</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>OzyPrimaryAction <span class="tag tv">Fire TV</span></h5>
+      <p class="path">ação primária</p>
+      <dl>
+        <dt>Forma</dt><dd>Cápsula, padding 26 × 14, vão interno 11</dd>
+        <dt>Cor</dt><dd>Fundo <code>Ink</code>, ícone e texto <code>AccentInk</code> — o par quente equivalente ao vidro branco do iPhone</dd>
+        <dt>Foco</dt><dd>Borda <code>Accent</code> 2 dp + escala e halo do <code>ActionShell</code></dd>
+        <dt>Desabilitado</dt><dd>Fundo <code>Ink @ 38%</code></dd>
+        <dt>Tipo</dt><dd><code>label</code> · ícone 22 dp</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>OzySecondaryAction <span class="tag tv">Fire TV</span></h5>
+      <p class="path">ação secundária e de perigo</p>
+      <dl>
+        <dt>Repouso</dt><dd>Fundo <code>Elevated</code>, borda <code>Line</code>, conteúdo <code>Ink</code> (ou <code>Danger</code> se destrutiva)</dd>
+        <dt>Foco</dt><dd>Fundo e borda <code>Ink</code>, conteúdo <code>AccentInk</code> — <b>inclusive a destrutiva</b>, que perde o vermelho ao focar</dd>
+        <dt>Forma</dt><dd>Cápsula, padding 24 × 14</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>OzyIconAction <span class="tag tv">Fire TV</span></h5>
+      <p class="path">ação circular</p>
+      <dl>
+        <dt>Forma</dt><dd>Círculo de 54 dp</dd>
+        <dt>Repouso</dt><dd>Fundo <code>Elevated @ 88%</code>, borda <code>Line</code>, ícone <code>Ink</code></dd>
+        <dt>Foco</dt><dd>Fundo <code>Ink</code>, ícone <code>AccentInk</code></dd>
+        <dt>Obrigatório</dt><dd><code>contentDescription</code> — é o único componente sem rótulo visível</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>OzyChip <span class="tag tv">Fire TV</span></h5>
+      <p class="path">filtro do catálogo</p>
+      <dl>
+        <dt>Repouso</dt><dd>Transparente, borda <code>Line</code>, texto <code>Muted</code></dd>
+        <dt>Selecionado</dt><dd>Fundo <code>Accent @ 12%</code>, borda <code>Accent @ 55%</code>, texto <code>Accent</code></dd>
+        <dt>Foco</dt><dd>Fundo <code>Ink</code>, texto <code>AccentInk</code> (o foco vence a seleção)</dd>
+        <dt>Forma</dt><dd>Cápsula, padding 22 × 13</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>OzyNavigationRail <span class="tag tv">Fire TV</span></h5>
+      <p class="path">navegação principal</p>
+      <dl>
+        <dt>Larguras</dt><dd>82 dp em repouso → 210 dp com foco. <b>A largura não anima</b> — relayout de tela cheia custa caro no Stick de 1 GB</dd>
+        <dt>Fundo</dt><dd>Degradê que dissolve no conteúdo, não um painel com borda</dd>
+        <dt>Itens</dt><dd>Início · Catálogo (topo) — Conta (base, empurrada por <code>weight</code>)</dd>
+        <dt>Item</dt><dd>48 dp de altura, raio 14; 48 → 176 dp de largura; ícone 22; vão 14; espaço 10 entre itens</dd>
+        <dt>Cores do item</dt><dd>Foco: fundo <code>Ink</code> + conteúdo <code>AccentInk</code> · Selecionado: conteúdo <code>Accent</code> · Repouso: <code>Muted</code></dd>
+        <dt>Cabeçalho</dt><dd>Marca 42 dp; o nome "Ozymandias" só aparece expandido</dd>
+        <dt>Foco</dt><dd>Seta direita do item selecionado leva ao conteúdo (<code>focusProperties</code>)</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>OzySplitShell <span class="tag tv">Fire TV</span></h5>
+      <p class="path">estrutura de todas as telas de entrada</p>
+      <dl>
+        <dt>Layout</dt><dd>Duas colunas, vão 56, padding 56 × 34, centradas verticalmente</dd>
+        <dt>Coluna esquerda</dt><dd>370 dp fixos: marca 56 → versalete → título (<code>display</code>) → subtítulo (<code>body</code>, <code>Muted</code>) → conteúdo livre</dd>
+        <dt>Coluna direita</dt><dd>Painel <code>Surface</code>, raio 22, borda <code>Line</code>, padding 30</dd>
+        <dt>Por quê</dt><dd>Pareamento e conta tinham estruturas diferentes para o mesmo problema e pareciam telas de produtos distintos</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>OzyEyebrow / OzyStatus <span class="tag tv">Fire TV</span></h5>
+      <p class="path">rótulo e ponto de estado</p>
+      <dl>
+        <dt>Eyebrow</dt><dd>Texto em caixa alta pelo componente, estilo <code>meta</code>, cor <code>Accent</code> (ou <code>Muted</code> como rótulo de campo)</dd>
+        <dt>Status</dt><dd>Ponto de 9 dp + rótulo <code>caption</code> na mesma cor, vão 10</dd>
+        <dt>Tons</dt><dd><code>Okay</code> tudo certo · <code>Warning</code> esperando · <code>Danger</code> falhou</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Card de pôster / deitado <span class="tag tv">Fire TV</span></h5>
+      <p class="path">PosterCard · LandscapeCard</p>
+      <dl>
+        <dt>Pôster</dt><dd>Arte 144 × 216 dp; card 156 dp com a faixa de foco</dd>
+        <dt>Deitado</dt><dd>Arte 256 × 144 dp; card 268 dp. Play em círculo de 44 no centro e barra de progresso de 5 dp na base</dd>
+        <dt>Texto</dt><dd>Nome <code>label</code> · metadado <code>caption</code> em <code>Muted</code>, recuados 6 dp para alinhar com a arte</dd>
+        <dt>Foco</dt><dd>O card ganha <code>zIndex</code> maior, para escalar por cima dos vizinhos</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Linha de episódio <span class="tag tv">Fire TV</span></h5>
+      <p class="path">EpisodeRow</p>
+      <dl>
+        <dt>Anatomia</dt><dd>Número em quadro 46 dp (raio 12) · nome + duração · barra de progresso 150 × 5 dp</dd>
+        <dt>Padding</dt><dd>18 × 14, recuo lateral de 50 dp (<code>ShelfEdge</code>)</dd>
+        <dt>Foco</dt><dd>Envolvida por <code>OzyFocusFrame</code>, como qualquer card</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Campo de texto <span class="tag tv">Fire TV</span></h5>
+      <p class="path">OzyTextField · OutlinedTextField</p>
+      <dl>
+        <dt>Forma</dt><dd>Raio 16 (<code>cardRadius</code>)</dd>
+        <dt>Repouso</dt><dd>Container <code>Surface</code>, borda <code>Line</code>, rótulo <code>Muted</code></dd>
+        <dt>Foco</dt><dd>Container <code>Elevated</code>, borda e rótulo <code>Accent</code>, cursor <code>Accent</code></dd>
+        <dt>Tipo</dt><dd>Texto <code>label</code>, rótulo <code>caption</code></dd>
+        <dt>Busca</dt><dd>Mesma anatomia, 320 dp de largura, com glifo <code>SEARCH</code> à esquerda</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Painel de erro <span class="tag tv">Fire TV</span></h5>
+      <p class="path">ErrorPanel</p>
+      <dl>
+        <dt>Forma</dt><dd>Raio 16, padding 12, largura total</dd>
+        <dt>Cor</dt><dd>Fundo <code>Danger</code> tênue, borda <code>Danger @ 35%</code>, texto <code>Danger</code> em <code>caption</code></dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h5>Player <span class="tag tv">Fire TV</span></h5>
+      <p class="path">TvPlayerScreen</p>
+      <dl>
+        <dt>Fundo</dt><dd>Preto real (camada de vídeo)</dd>
+        <dt>Painel</dt><dd>Base com véu vertical; padding 56 lateral, 30 vertical</dd>
+        <dt>Progresso</dt><dd>Barra de 6 dp, cápsula, trilho <code>Ink @ 18%</code></dd>
+        <dt>Tempos</dt><dd>Decorrido à esquerda, restante ("−") à direita, <code>caption</code> em <code>Muted</code></dd>
+        <dt>Fila de ações</dt><dd>−10 s · play/pause (primária) · +10 s · Áudio · Legenda · velocidade · Próximo episódio — vão 4</dd>
+        <dt>Rótulos falantes</dt><dd>Os botões dizem o estado atual: "Áudio: Português · estéreo", "1.5×"</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 11 ESTADOS ============ -->
+<section id="estados">
+  <div class="eyebrow">11 · estados/</div>
+  <h2>Foco, toque e estados</h2>
+
+  <h3>Modelo de foco da TV</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Camada</th><th>Repouso</th><th>Foco</th></tr></thead>
+      <tbody>
+        <tr><td>Escala</td><td class="mono">1.00</td><td class="mono">1.06 (140 ms)</td></tr>
+        <tr><td>Halo</td><td class="mono">transparente</td><td class="mono">Accent @ 16%, raio 22 (140 ms)</td></tr>
+        <tr><td>Anel</td><td>nenhum</td><td class="mono">Ink @ 94%, 2 dp, raio 16</td></tr>
+        <tr><td>Sombra</td><td class="mono">0</td><td class="mono">18 dp</td></tr>
+        <tr><td>Conteúdo</td><td class="mono">Ink / Muted</td><td class="mono">AccentInk sobre Ink</td></tr>
+        <tr><td>Ordem Z</td><td class="mono">0</td><td class="mono">2 (escala por cima dos vizinhos)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="dodont">
+    <div class="dd do"><h6>Faça</h6><ul>
+      <li><strong>Um só item focado</strong> por tela, sempre visível sem rolar.</li>
+      <li><strong>Reserve a faixa de 6 dp</strong> em qualquer elemento novo que receba foco.</li>
+      <li><strong>Aceite Enter e Centro do D-pad</strong> — <code>ozyClickable</code> trata os dois.</li>
+      <li><strong>Devolva o foco</strong> ao item selecionado do rail ao voltar de uma tela.</li>
+    </ul></div>
+    <div class="dd dont"><h6>Não faça</h6><ul>
+      <li><strong>Borda em repouso</strong> para "sugerir" que algo é focável.</li>
+      <li><strong>Animar largura</strong> de containers grandes — o Fire Stick de 1 GB engasga.</li>
+      <li><strong>Hover</strong>: não existe cursor na TV; o único estado é foco.</li>
+      <li><strong>Dois vidros/halos aninhados</strong> — o halo do pai corta o do filho.</li>
+    </ul></div>
+  </div>
+
+  <h3>Estados de conteúdo — os cinco que toda tela precisa cobrir</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Estado</th><th>iPhone</th><th>Fire TV</th></tr></thead>
+      <tbody>
+        <tr><td><b>Carregando</b></td><td><code>LoadingContent</code>: <code>ProgressView</code> grande + rótulo em <code>subheadline</code>/<code>Muted</code> ("Carregando seu acervo…")</td><td>Marca 52 + indicador circular <code>Accent</code> 3 dp + "Só um instante…" sobre véu <code>Background @ 82%</code></td></tr>
+        <tr><td><b>Preparando</b></td><td>Progresso determinado + "Preparando para este iPhone" + N% + motivo</td><td>"Preparando N%" sob a marca</td></tr>
+        <tr><td><b>Vazio</b></td><td><code>ContentUnavailableView</code> ("Seu acervo está vazio")</td><td><code>EmptyState</code> com marca e texto em <code>Muted</code></td></tr>
+        <tr><td><b>Erro recuperável</b></td><td><code>ContentErrorView</code>: <code>wifi.exclamationmark</code> + "Não foi possível carregar" + motivo + "Tentar novamente" (<code>borderedProminent</code>)</td><td><code>FullError</code> / <code>ErrorPanel</code> com ação de repetir</td></tr>
+        <tr><td><b>Erro de ação</b></td><td>Banner in loco em <code>Danger @ 12%</code>, animado com <code>snappy(0.25)</code></td><td>Linha <code>caption</code> em <code>Danger</code> abaixo da fila de ações</td></tr>
+        <tr><td><b>Sessão restaurando</b></td><td>Marca 64 + <code>ProgressView</code> + "Restaurando sessão…"</td><td><code>BrandStatus</code>: marca 64 + mensagem em <code>Muted</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Estados de toque no iPhone</h3>
+  <ul class="plain">
+    <li><strong>Pressionado:</strong> escala 0.99 + fundo a 82% (primário) ou 65% (linha de servidor). Sem <em>ripple</em>, sem sombra.</li>
+    <li><strong>Desabilitado:</strong> opacidade 45% no primário; controles do sistema usam o comportamento nativo.</li>
+    <li><strong>Alvo de toque:</strong> o card ou linha inteira, declarada com <code>contentShape</code>. Vidro só registra toque no conteúdo, por isso todo botão de vidro declara sua forma.</li>
+    <li><strong>Progresso otimista:</strong> favoritar e marcar como assistido mudam a UI antes da resposta do servidor; o erro volta como banner.</li>
+  </ul>
+</section>
+
+<!-- ============ 12 MOVIMENTO ============ -->
+<section id="movimento">
+  <div class="eyebrow">12 · movimento/</div>
+  <h2>Movimento</h2>
+  <p class="intro">Movimento é confirmação, nunca decoração. Não há animação de entrada de tela, parallax ambiente nem transição customizada entre rotas.</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Token</th><th class="mono">Duração</th><th>Curva</th><th>Uso</th></tr></thead>
+      <tbody>
+        <tr><td><code>fastMotion</code> <span class="tag tv">TV</span></td><td class="num">140 ms</td><td>tween</td><td>Escala e halo de foco — precisa ser mais rápido que a repetição do D-pad</td></tr>
+        <tr><td><code>regularMotion</code> <span class="tag tv">TV</span></td><td class="num">180 ms</td><td>tween</td><td>Demais transições de estado</td></tr>
+        <tr><td>snappy <span class="tag ios">iPhone</span></td><td class="num">250 ms</td><td>snappy</td><td>Aparecer/sumir de erro, favorito, botão de reprodução ocupada</td></tr>
+        <tr><td>snappy + bounce <span class="tag ios">iPhone</span></td><td class="num">350 ms · bounce 0.08</td><td>snappy</td><td>Troca de aparência claro/escuro</td></tr>
+        <tr><td>Elástico do hero <span class="tag ios">iPhone</span></td><td>—</td><td>sem animação</td><td>Acompanha o dedo 1:1; animar deixaria a borracha atrasada</td></tr>
+        <tr><td>Transição de ícone <span class="tag ios">iPhone</span></td><td>sistema</td><td><code>symbolEffect(.replace)</code></td><td>Lua ↔ sol, play ↔ pause</td></tr>
+        <tr><td>Tab bar <span class="tag ios">iPhone</span></td><td>sistema</td><td><code>tabBarMinimizeBehavior(.onScrollDown)</code></td><td>Minimiza ao rolar para baixo, com o mini player junto</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rule"><b>Reduzir movimento.</b> Com <code>accessibilityReduceMotion</code> ligado: o elástico do banner é desligado (puxada = 0) e a troca de aparência acontece sem animação. Qualquer movimento novo precisa ter esse desligamento previsto.</div>
+  <div class="rule warn"><b>Sem crossfade na TV.</b> A troca de tela é direta, sem transição: manter duas telas 1080p desenhadas ao mesmo tempo derruba o frame rate no Fire Stick. Não proponha transições cruzadas de tela cheia.</div>
+</section>
+
+<!-- ============ 13 TELAS ============ -->
+<section id="telas">
+  <div class="eyebrow">13 · telas/</div>
+  <h2>Telas e fluxos</h2>
+
+  <h3>iPhone — 5 abas + 10 telas empilhadas</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Tela</th><th>Entrada</th><th>Composição</th></tr></thead>
+      <tbody>
+        <tr><td><b>Início</b> <span class="tag ios">aba 1</span></td><td>Após autenticar</td><td>Banner de hero (sem barra de navegação) → "Continuar assistindo" → prateleiras do servidor → "Esquecidos". Puxar para atualizar</td></tr>
+        <tr><td><b>Acervo</b> <span class="tag ios">aba 2</span></td><td>Aba</td><td>Busca + fila de bibliotecas + fila de tipos + grade adaptativa. Ordenação no menu da barra. Paginação com botão "Carregar mais"</td></tr>
+        <tr><td><b>Coleções</b> <span class="tag ios">aba 3</span></td><td>Aba</td><td>Lista de coleções, criar coleção, detalhe com grade</td></tr>
+        <tr><td><b>Artistas</b> <span class="tag ios">aba 4</span></td><td>Aba</td><td>Grade de artistas → detalhe com discografia e "Todas as faixas" (com "Tocar tudo" e "Aleatório")</td></tr>
+        <tr><td><b>Perfil</b> <span class="tag ios">aba 5</span></td><td>Aba</td><td>Marca 72 → selo de sessão → avisos → cartão de dados → aparência → 3 links (Servidor, Conectar TV, Configurações) → Sair. Largura máx. 560</td></tr>
+        <tr><td>Detalhe do título</td><td>Card em qualquer grade</td><td>Banner + sinopse expansível + chips de metadado + ações (favorito, coleções, corrigir) + lista de arquivos</td></tr>
+        <tr><td>Player</td><td><code>fullScreenCover</code></td><td>Vídeo + scrim + 3 blocos de controle; PiP e AirPlay</td></tr>
+        <tr><td>Painel do servidor</td><td>Perfil</td><td>Acervo por biblioteca, varredura ao vivo, métricas, rotas</td></tr>
+        <tr><td>Configurações</td><td>Perfil</td><td>TMDB, FFmpeg, varredura automática</td></tr>
+        <tr><td>Conectar TV</td><td>Perfil</td><td>Ícone 54 → leitor de QR → "ou digite o código" → campo monoespaçado → autorizar</td></tr>
+        <tr><td>Corrigir correspondência</td><td>Detalhe</td><td>Busca no TMDB + lista de candidatos + aplicar</td></tr>
+        <tr><td>Coleções do título</td><td>Detalhe</td><td>Lista de pertencimento com alternadores</td></tr>
+        <tr><td>Escolha de servidor</td><td>Deslogado</td><td>Marca + campo de endereço + servidores recentes + validar</td></tr>
+        <tr><td>Login</td><td>Após validar servidor</td><td>Cabeçalho de marca + cartão com usuário, senha, "Manter conectado", entrar, "Esqueci a senha"</td></tr>
+        <tr><td>Falha ao restaurar</td><td>Abertura sem rede</td><td>Marca 64 + <code>wifi.exclamationmark</code> + motivo + tentar novamente / trocar conta</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Fire TV — 3 abas + 4 telas</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Tela</th><th>Estrutura</th></tr></thead>
+      <tbody>
+        <tr><td><b>Início</b></td><td>Hero de 410 dp (backdrop + véus + metadados + título + ações) → prateleiras de 26 dp de espaço → respiro de 46 dp</td></tr>
+        <tr><td><b>Catálogo</b></td><td>Título + contagem ("N de M títulos") → busca 320 dp + chips → grade de pôsteres</td></tr>
+        <tr><td><b>Conta</b></td><td><code>OzySplitShell</code>: marca + "Conectado" à esquerda; usuário, servidor e validade à direita, com sair e trocar servidor</td></tr>
+        <tr><td>Detalhe</td><td>Hero de 320 dp + sinopse (3 linhas) + ações + lista de episódios/arquivos</td></tr>
+        <tr><td>Escolha de servidor</td><td><code>OzySplitShell</code>: servidores descobertos na rede (glifo WIFI), recentes (CLOCK), campo de URL, conectar</td></tr>
+        <tr><td>Pareamento</td><td><code>OzySplitShell</code>: código em <code>display</code> âmbar + QR de 232 dp sobre <code>Ink</code> + alternativa por usuário e senha</td></tr>
+        <tr><td>Login</td><td><code>OzySplitShell</code>: usuário e senha, entrar</td></tr>
+        <tr><td>Player</td><td>Vídeo + véu inferior + título, progresso, tempos e fila de ações</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Fluxo entre os dois apps</h3>
+  <p class="note">O pareamento é o único ponto onde os apps se encontram, e é assimétrico por segurança: a TV mostra, o telefone autoriza. A TV exibe um código de pareamento e um QR; no iPhone, <b>Perfil › Conectar uma TV</b> lê o código pela câmera (ou por digitação) e aprova a sessão. As duas telas precisam ser redesenhadas juntas: os textos se citam mutuamente.</p>
+</section>
+
+<!-- ============ 14 TEMA ============ -->
+<section id="tema">
+  <div class="eyebrow">14 · tema/</div>
+  <h2>Claro e escuro</h2>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Plataforma</th><th>Padrão</th><th>Opções</th><th>Onde se troca</th></tr></thead>
+      <tbody>
+        <tr><td>iPhone</td><td><b>Escuro</b></td><td>Escuro · Claro · Sistema</td><td>Perfil › Aparência (segmentado) e, nas telas deslogadas, o botão flutuante de lua/sol</td></tr>
+        <tr><td>Fire TV</td><td><b>Escuro</b></td><td>nenhuma</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="plain">
+    <li>A preferência é guardada em <code>appearancePreference</code> e vale para o app inteiro, inclusive antes do login.</li>
+    <li><strong>"Sistema"</strong> devolve o controle ao iOS; <strong>"Escuro"</strong> é o padrão de instalação porque o produto é consumo de vídeo à noite.</li>
+    <li>O ícone do app tem variantes clara, escura e tingida — a troca é do sistema, não do app.</li>
+    <li><strong>Nada é declarado só em um tema.</strong> Todo componente lê tokens; nenhuma tela tem cor literal condicionada a tema, exceto a marca (que tem regra própria) e a camada de vídeo do player.</li>
+  </ul>
+
+  <div class="rule warn"><b>O tema claro é menos exercitado.</b> As telas de arte (Home, detalhe) foram desenhadas para o escuro: os véus dissolvem no <code>Background</code>, o que no claro produz uma transição de foto para creme mais dura. É o primeiro ponto a auditar em uma revisão do modo claro.</div>
+</section>
+
+<!-- ============ 15 ACESSIBILIDADE ============ -->
+<section id="acessibilidade">
+  <div class="eyebrow">15 · acessibilidade/</div>
+  <h2>Acessibilidade</h2>
+
+  <h3>Regras já aplicadas</h3>
+  <ul class="plain">
+    <li><strong>Área de toque de 44 × 44 pt</strong> em todo botão de ícone do iPhone, sem exceção — inclusive nos controles sobre o vídeo.</li>
+    <li><strong>Dynamic Type</strong> em todo texto do iPhone: nenhum tamanho fixo em conteúdo. Cards reservam altura para o texto crescer.</li>
+    <li><strong>Reduzir movimento</strong> respeitado no elástico do banner e na troca de aparência.</li>
+    <li><strong>Rótulos de VoiceOver</strong> em toda ação sem texto, e no estado, não no ícone: "Pausar"/"Reproduzir", "Usar modo claro"/"Usar modo escuro", "Encerrar reprodução".</li>
+    <li><strong>Valores de acessibilidade</strong> no slider ("00:12:30 de 01:48:00") e no alternador de aparência.</li>
+    <li><strong>Agrupamento</strong>: cards e blocos de marca são combinados em um só elemento (<code>accessibilityElement(children: .combine)</code>), para o leitor não soletrar arte + nome + ano separadamente.</li>
+    <li><strong>Ações alternativas</strong>: "marcar como assistido" existe no menu de contexto <em>e</em> como ação de acessibilidade nomeada.</li>
+    <li><strong>Na TV</strong>: <code>contentDescription</code> em toda ação circular e em cada item do rail, com estado <code>selected</code> semântico.</li>
+    <li><strong>Seleção de texto habilitada</strong> em dados que a pessoa pode precisar copiar (usuário, servidor, instruções de terminal).</li>
+    <li><strong>Contraste</strong>: todos os pares texto/fundo passam AA, com a única exceção documentada em <a href="#cor">Cor</a>.</li>
+  </ul>
+
+  <h3>Identificadores de teste (contrato com a automação)</h3>
+  <p class="note">São <b>75 identificadores</b> estáveis usados pelos testes de UI. Renomear ou remover um elemento identificado quebra a suíte — se o redesenho eliminar um destes, sinalize no <em>handoff</em>.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Área</th><th class="mono">Identificadores</th></tr></thead>
+      <tbody>
+        <tr><td>Autenticação</td><td class="mono">serverSelectionScreen · serverField · validateServerButton · changeServerButton · loginScreen · usernameField · passwordField · rememberToggle · loginButton · errorBanner · authenticatedApp</td></tr>
+        <tr><td>Início e acervo</td><td class="mono">homeScreen · homeLoaded · homeHero · heroPlayButton · heroDetailsButton · catalogScreen · catalogLoaded · catalogSortButton · catalogLoadMoreButton · catalogLoadingMore · catalogPageError · titleCard-{id}</td></tr>
+        <tr><td>Detalhe</td><td class="mono">titleDetailScreen · titleDetailName · primaryPlayButton · favoriteButton · overviewToggle · playFile-{id} · titleCollectionsButton · correctMatchButton · matchSearchButton · matchYearField · applyMatch-{id} · refreshMetadataButton</td></tr>
+        <tr><td>Coleções e artistas</td><td class="mono">collectionsTab · collectionsLoaded · collectionsError · createCollectionButton · collection-{id} · membership-{id} · artistsTab · artistsLoaded · artist-{nome} · artistDetailName · artistTrack-{id} · playAllButton · shuffleButton</td></tr>
+        <tr><td>Reprodução</td><td class="mono">miniPlayerBar · miniPlayerPlayPauseButton · miniPlayerCloseButton · playPauseButton · closePlayerButton · nextEpisodeButton · playbackSpeedButton · trackMenuButton · activeSubtitle · airPlayButton · pictureInPictureButton</td></tr>
+        <tr><td>Perfil e servidor</td><td class="mono">profileTab · sessionConfirmed · sessionExpiryWarning · passwordChangeNotice · appearancePicker · appearanceToggle · serverDashboardButton · serverDashboardLoaded · serverSettingsButton · settingsLoaded · saveSettingsButton · tmdbKeyField · startScanButton · scanLiveIndicator · pairTVButton · logoutButton</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Pontos ainda não cobertos</h3>
+  <ul class="plain">
+    <li><strong>Tamanhos de acessibilidade extremos (AX3–AX5)</strong> não foram validados na grade do acervo nem nos cards de prateleira de largura fixa (128 pt).</li>
+    <li><strong>Contraste aumentado</strong> (<code>increaseContrast</code>) não tem tratamento: <code>Line</code> continuaria em 1.6:1.</li>
+    <li><strong>Fire TV não tem escala de texto</strong> — não existe Dynamic Type no Fire OS; a legibilidade depende inteiramente da escala fixa de <code>OzyType</code>.</li>
+    <li><strong>Área segura de TV (overscan)</strong> não está declarada explicitamente; a margem de 56 dp cobre na prática, mas não é uma garantia.</li>
+  </ul>
+</section>
+
+<!-- ============ 16 VOZ ============ -->
+<section id="voz">
+  <div class="eyebrow">16 · voz/</div>
+  <h2>Voz e texto</h2>
+  <p class="intro">Português do Brasil, direto, sem jargão de servidor na cara do usuário. O app fala de <em>acervo</em>, <em>títulos</em> e <em>faixas</em> — não de <em>libraries</em>, <em>media items</em> e <em>streams</em>.</p>
+
+  <div class="dodont">
+    <div class="dd do"><h6>Faça</h6><ul>
+      <li><strong>Diga o que vai acontecer:</strong> "Assistir", "Autorizar TV", "Conectar", "Tentar novamente".</li>
+      <li><strong>Mostre o progresso no próprio rótulo:</strong> "Entrando…", "Conectando…", "Saindo…", "Preparando · 42%".</li>
+      <li><strong>Erro com saída:</strong> "Quem administra o servidor pode redefinir a senha no terminal com <em>nas passwd seu.usuario</em>."</li>
+      <li><strong>Frase de sentença</strong> em títulos e botões ("Conectar uma TV"), caixa alta só no versalete.</li>
+      <li><strong>Reticências (…)</strong> como caractere único em estados em andamento.</li>
+    </ul></div>
+    <div class="dd dont"><h6>Não faça</h6><ul>
+      <li><strong>Pedir desculpas</strong> ou culpar o usuário. "Não foi possível carregar" + motivo, e ponto.</li>
+      <li><strong>Termos de implementação:</strong> nada de "token", "endpoint", "transcodificação" em texto de tela (exceto no painel técnico do servidor, que é para administradores).</li>
+      <li><strong>Title Case</strong> em português.</li>
+      <li><strong>Emoji</strong> em qualquer lugar da interface.</li>
+    </ul></div>
+  </div>
+
+  <h3>Vocabulário canônico</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Conceito</th><th>Diga</th><th>Nunca</th></tr></thead>
+      <tbody>
+        <tr><td>Biblioteca de mídia</td><td><b>Acervo</b></td><td>Library, Biblioteca (na aba)</td></tr>
+        <tr><td>Item de mídia</td><td><b>Título</b></td><td>Item, Mídia, Conteúdo</td></tr>
+        <tr><td>Iniciar vídeo</td><td><b>Assistir</b> · <b>Continuar</b></td><td>Reproduzir (em botão de vídeo)</td></tr>
+        <tr><td>Iniciar áudio</td><td><b>Tocar</b> · <b>Tocar tudo</b></td><td>Play, Executar</td></tr>
+        <tr><td>Sair da conta</td><td><b>Sair</b></td><td>Logout, Desconectar</td></tr>
+        <tr><td>Servidor local</td><td><b>Sua rede</b></td><td>LAN, Host</td></tr>
+        <tr><td>Faixa de áudio/legenda</td><td><b>Áudio</b> · <b>Legenda</b></td><td>Track, Stream</td></tr>
+        <tr><td>Descoberta</td><td><b>Encontramos servidores na rede local</b></td><td>Discovery, mDNS</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Formatos</h3>
+  <ul class="plain">
+    <li><strong>Separador de metadados:</strong> espaço + <code>·</code> + espaço. "FILME · 2026 · 2 h".</li>
+    <li><strong>Duração:</strong> "2 h 14 min" em texto; "hh:mm:ss" (ou "mm:ss") em cronômetro, sempre com dígitos monoespaçados.</li>
+    <li><strong>Restante:</strong> prefixo "−" (sinal de menos, não hífen): "−00:42:10". Em card: "faltam 38 min".</li>
+    <li><strong>Data de validade:</strong> data abreviada + hora curta; em aviso, forma relativa ("vence em 3 horas").</li>
+    <li><strong>Aspas:</strong> curvas “ ”, no padrão tipográfico do português.</li>
+  </ul>
+</section>
+
+<!-- ============ 17 LACUNAS ============ -->
+<section id="lacunas">
+  <div class="eyebrow">17 · lacunas/</div>
+  <h2>Lacunas em aberto</h2>
+  <p class="intro">O que este sistema <strong>não</strong> resolve hoje. Cada item é uma decisão de design pendente, ordenada por impacto no trabalho de redesenho.</p>
+
+  <div class="gaps">
+    <div class="gap p1"><span class="sev">crítico</span><b>Não existe iPad, nem paisagem no iPhone</b>
+      <p>O alvo é <code>TARGETED_DEVICE_FAMILY = 1</code>: só iPhone. Nenhum layout foi pensado para largura de tablet, Split View ou rotação. Todo o dimensionamento de grade e de banner assume uma coluna estreita. Se iPad entrar no escopo, o sistema precisa de uma segunda grade e de regras de largura máxima de leitura.</p></div>
+
+    <div class="gap p1"><span class="sev">crítico</span><b>O tema claro nunca foi auditado nas telas de arte</b>
+      <p>Véus, gradientes e a escolha de branco sobre foto foram calibrados no escuro. Além disso, <code>Accent</code> sobre <code>Elevated</code> reprova em contraste no claro (4.43:1). É preciso uma passada dedicada ao modo claro com capas reais, claras e escuras.</p></div>
+
+    <div class="gap p2"><span class="sev">alto</span><b>A TV tem 11 glifos; o iPhone, cerca de 30 símbolos</b>
+      <p>Cada função nova na TV exige desenhar um glifo vetorial em código. Não existe biblioteca nem arquivo-fonte de ícones — a especificação é o próprio Kotlin. Recomenda-se produzir um arquivo de ícones em grade 24 e um plano para as funções que hoje só existem no iPhone (favorito, coleções, ordenação, correspondência).</p></div>
+
+    <div class="gap p2"><span class="sev">alto</span><b>Nenhum token de espaçamento nomeado no iPhone</b>
+      <p>A TV tem <code>OzyTvTokens</code>; o iPhone tem números soltos nas telas (7, 12, 14, 16, 20, 22, 30…). Os valores são consistentes na prática, mas não são nomeados nem impostos. Um <code>OzySpacing</code> equivalente evitaria a deriva na próxima leva de telas.</p></div>
+
+    <div class="gap p2"><span class="sev">alto</span><b>Sem tokens de tipografia no iPhone</b>
+      <p>O iPhone usa os estilos nativos diretamente, o que é a decisão correta para Dynamic Type — mas significa que "título de prateleira" é <code>.headline</code> escrito em nove lugares. Uma camada semântica fina (<code>OzyText.shelf</code> → <code>.headline</code>) daria o mesmo controle que a TV já tem, sem perder o Dynamic Type.</p></div>
+
+    <div class="gap p3"><span class="sev">médio</span><b>Marca sobre fundo âmbar não está definida</b>
+      <p>Existem apenas as versões clara e escura. Se a marca precisar aparecer sobre <code>Accent</code> (splash, materiais, ícone tingido), a inversão precisa ser especificada — a proposta ilustrada na seção 02 é sugestão, não código.</p></div>
+
+    <div class="gap p3"><span class="sev">médio</span><b>Colisão de tokens no tema claro</b>
+      <p><code>Surface</code> e <code>AccentInk</code> compartilham <code>#FDFBF7</code>. Funciona hoje por acaso de composição; formalize a separação antes de qualquer componente novo que ponha um sobre o outro.</p></div>
+
+    <div class="gap p3"><span class="sev">médio</span><b>Sem estados de erro específicos por causa</b>
+      <p>Rede fora, servidor fora, token vencido e arquivo corrompido chegam à interface com o mesmo tratamento visual ("Não foi possível carregar" + texto do servidor). Diferenciar visualmente as causas recuperáveis das terminais melhoraria a recuperação.</p></div>
+
+    <div class="gap p3"><span class="sev">médio</span><b>Sem especificação de notificações, widgets ou tela de bloqueio</b>
+      <p>A reprodução sobrevive ao fechamento do player e do app, mas o visual dos controles no Centro de Controle, na tela de bloqueio e no CarPlay não foi desenhado. É território novo, não uma lacuna de manutenção.</p></div>
+
+    <div class="gap p3"><span class="sev">médio</span><b>Sem versão em outro idioma</b>
+      <p>Todo texto é português do Brasil, embutido no código. Não há infraestrutura de tradução nem regras de comprimento — palavras alemãs ou francesas quebrariam a fila de ações do hero da TV, que tem largura fixa de 620/680 dp.</p></div>
+  </div>
+
+  <h3>Como entregar mudanças a este sistema</h3>
+  <ul class="plain">
+    <li><strong>Cor nova só como token semântico</strong>, com valor claro e escuro definidos juntos e a razão de contraste calculada contra <code>Background</code>, <code>Surface</code> e <code>Elevated</code>.</li>
+    <li><strong>Componente novo de TV entra com o modelo de foco completo</strong> — repouso, foco, desabilitado — e com a faixa de 6 dp já contabilizada.</li>
+    <li><strong>Componente novo de iPhone declara o alvo de toque</strong> e o comportamento em Dynamic Type grande.</li>
+    <li><strong>Toda tela nova especifica os cinco estados</strong>: carregando, vazio, erro recuperável, erro de ação e conteúdo.</li>
+    <li><strong>Se um identificador de acessibilidade desaparecer</strong>, diga qual — a suíte de testes de UI depende deles.</li>
+  </ul>
+</section>
+
+<footer>
+  <div>Ozymandias Design System · extraído do código em 2 de setembro de 2026</div>
+  <div>iPhone iOS 26.0 · Fire TV minSdk 25 · pt-BR</div>
+</footer>
+
+</div>
+</main>
+</div>

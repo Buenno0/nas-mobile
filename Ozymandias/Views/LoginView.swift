@@ -1,7 +1,46 @@
 import SwiftUI
 
+/// A mesma linha serve aos servidores achados na rede e aos recentes: fora o
+/// ícone, não há diferença entre escolher um e outro.
+private struct ServerChoiceRow: View {
+  let name: String
+  let address: String
+  let symbol: String
+  var isDisabled = false
+  let select: () -> Void
+
+  var body: some View {
+    Button(action: select) {
+      HStack(spacing: 12) {
+        Image(systemName: symbol)
+          .foregroundStyle(Color.ozAccent)
+          .frame(width: 28, height: 28)
+        VStack(alignment: .leading, spacing: 2) {
+          Text(name)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(Color.ozInk)
+          Text(address)
+            .font(.caption)
+            .foregroundStyle(Color.ozMuted)
+            .lineLimit(1)
+        }
+        Spacer()
+        Image(systemName: "chevron.right")
+          .font(.caption.weight(.bold))
+          .foregroundStyle(Color.ozMuted)
+      }
+      .frame(minHeight: 52)
+      .padding(.horizontal, 12)
+    }
+    .buttonStyle(ServerRowButtonStyle())
+    .disabled(isDisabled)
+    .accessibilityLabel("Conectar a \(address)")
+  }
+}
+
 struct ServerSelectionView: View {
   @Bindable var store: SessionStore
+  @State private var discovery = ServerDiscovery()
   @FocusState private var isServerFocused: Bool
 
   var body: some View {
@@ -18,6 +57,15 @@ struct ServerSelectionView: View {
     .ozyScreenBackground()
     .accessibilityIdentifier("serverSelectionScreen")
     .onChange(of: store.serverInput) { _, _ in store.serverDidChange() }
+    // A busca só roda nesta tela: é aqui que ela serve para algo, e assim o
+    // aviso de acesso à rede local aparece no momento em que faz sentido.
+    .task { discovery.start() }
+    .onDisappear { discovery.stop() }
+  }
+
+  /// Um servidor já listado nos recentes não precisa aparecer duas vezes.
+  private var discoveredServers: [DiscoveredServer] {
+    discovery.servers.filter { !store.recentServers.contains($0.address) }
   }
 
   private var serverCard: some View {
@@ -30,6 +78,28 @@ struct ServerSelectionView: View {
           .foregroundStyle(Color.ozMuted)
       }
 
+      if !discoveredServers.isEmpty {
+        VStack(alignment: .leading, spacing: 10) {
+          Label("Encontrados na sua rede", systemImage: "wifi")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(Color.ozMuted)
+
+          ForEach(discoveredServers) { server in
+            ServerChoiceRow(
+              name: server.name,
+              address: server.address,
+              symbol: "externaldrive.badge.wifi",
+              isDisabled: store.isValidatingServer
+            ) {
+              isServerFocused = false
+              store.selectRecentServer(server.address)
+              Task { await store.validateServer() }
+            }
+            .accessibilityIdentifier("discoveredServer-\(server.address)")
+          }
+        }
+      }
+
       if !store.recentServers.isEmpty {
         VStack(alignment: .leading, spacing: 10) {
           Label("Servidores recentes", systemImage: "clock.arrow.circlepath")
@@ -37,35 +107,16 @@ struct ServerSelectionView: View {
             .foregroundStyle(Color.ozMuted)
 
           ForEach(store.recentServers.prefix(3), id: \.self) { server in
-            Button {
+            ServerChoiceRow(
+              name: serverName(server),
+              address: server,
+              symbol: "server.rack",
+              isDisabled: store.isValidatingServer
+            ) {
               isServerFocused = false
               store.selectRecentServer(server)
               Task { await store.validateServer() }
-            } label: {
-              HStack(spacing: 12) {
-                Image(systemName: "server.rack")
-                  .foregroundStyle(Color.ozAccent)
-                  .frame(width: 28, height: 28)
-                VStack(alignment: .leading, spacing: 2) {
-                  Text(serverName(server))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.ozInk)
-                  Text(server)
-                    .font(.caption)
-                    .foregroundStyle(Color.ozMuted)
-                    .lineLimit(1)
-                }
-                Spacer()
-                Image(systemName: "chevron.right")
-                  .font(.caption.weight(.bold))
-                  .foregroundStyle(Color.ozMuted)
-              }
-              .frame(minHeight: 52)
-              .padding(.horizontal, 12)
             }
-            .buttonStyle(ServerRowButtonStyle())
-            .disabled(store.isValidatingServer)
-            .accessibilityLabel("Conectar a \(server)")
           }
         }
 

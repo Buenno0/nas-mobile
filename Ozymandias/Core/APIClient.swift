@@ -262,6 +262,33 @@ struct APIClient: Sendable {
     )
   }
 
+  // MARK: Assistir junto
+
+  func createRoom(fileID: Int, position: Double, playing: Bool, token: String) async throws
+    -> RoomState
+  {
+    try await send(
+      path: "/api/juntos", method: "POST", bearer: token,
+      body: RoomCreateRequest(fileID: fileID, posicao: position, tocando: playing))
+  }
+
+  func room(code: String, token: String) async throws -> RoomState {
+    try await send(path: "/api/juntos/\(Self.roomSegment(code))", bearer: token)
+  }
+
+  func sendRoomCommand(_ command: RoomCommand, code: String, token: String) async throws {
+    try await sendWithoutResponse(
+      path: "/api/juntos/\(Self.roomSegment(code))", method: "POST", bearer: token, body: command)
+  }
+
+  func roomEvents(code: String, token: String) throws -> AsyncThrowingStream<RoomMessage, Error> {
+    try eventStream(path: "/api/juntos/\(Self.roomSegment(code))/eventos", bearer: token)
+  }
+
+  private static func roomSegment(_ code: String) -> String {
+    code.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? code
+  }
+
   func imageData(path: String, token: String) async throws -> Data {
     try await resourceData(path: path, token: token)
   }

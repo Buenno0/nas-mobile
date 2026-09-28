@@ -3,6 +3,17 @@ import Foundation
 struct HealthResponse: Codable, Equatable, Sendable {
   let status: String
   let time: String
+  /// "mac" ou "nuvem" (instância cloud). Servidores antigos não mandam.
+  var role: String? = nil
+  /// O Mac anuncia onde a instância cloud atende; o app entra nela também e
+  /// a usa quando o Mac não responde.
+  var cloudAddress: String? = nil
+
+  enum CodingKeys: String, CodingKey {
+    case status, time
+    case role = "papel"
+    case cloudAddress = "endereco_nuvem"
+  }
 }
 
 struct LoginRequest: Codable, Equatable, Sendable {
@@ -77,6 +88,20 @@ enum TVPairingCode {
 }
 
 struct SessionCredential: Codable, Equatable, Sendable {
+  let serverURL: URL
+  let token: String
+  let expiresAt: Date
+  /// A sessão na instância cloud, aberta no mesmo login. Só existe na
+  /// credencial guardada (a do Mac); nunca aninha outra.
+  var away: AwayCredential? = nil
+
+  var awaySession: SessionCredential? {
+    guard let away, away.expiresAt > .now else { return nil }
+    return SessionCredential(serverURL: away.serverURL, token: away.token, expiresAt: away.expiresAt)
+  }
+}
+
+struct AwayCredential: Codable, Equatable, Sendable {
   let serverURL: URL
   let token: String
   let expiresAt: Date
@@ -652,9 +677,15 @@ struct PlaybackPlan: Codable, Equatable, Sendable {
   let preparation: PreparationProgress?
   let ffmpegAvailable: Bool
   let transcodingEnabled: Bool
+  /// Só na nuvem com o Mac no modo local (ou só no Mac, vendo pela nuvem):
+  /// o item existe, mas não toca agora.
+  var unavailable: Bool? = nil
+  var location: String? = nil
 
   enum CodingKeys: String, CodingKey {
     case url
+    case unavailable = "indisponivel"
+    case location = "localizacao"
     case mode = "modo"
     case reason = "motivo"
     case directURL = "url_direta"

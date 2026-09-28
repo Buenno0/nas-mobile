@@ -11,8 +11,10 @@
 	<key>CFBundleShortVersionString</key><string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key><string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key><true/>
+	<key>CFBundleURLTypes</key><array><dict><key>CFBundleURLName</key><string>com.buenno.Ozymandias.sala</string><key>CFBundleURLSchemes</key><array><string>ozymandias</string></array></dict></array>
 	<key>NSAppTransportSecurity</key><dict><key>NSAllowsLocalNetworking</key><true/></dict>
-	<key>NSLocalNetworkUsageDescription</key><string>O Ozymandias usa a rede local para conectar ao seu servidor de mídia.</string>
+	<key>NSBonjourServices</key><array><string>_ozymandias._tcp</string></array>
+	<key>NSLocalNetworkUsageDescription</key><string>O Ozymandias procura o seu servidor de mídia na rede local e se conecta a ele.</string>
 	<key>NSCameraUsageDescription</key><string>O Ozymandias usa a câmera para escanear o QR Code mostrado na TV.</string>
 	<key>UILaunchScreen</key><dict/>
 	<key>UIBackgroundModes</key><array><string>audio</string></array>

@@ -34,6 +34,8 @@ final class SessionStore {
   private(set) var isLoadingMoreCatalog = false
   private(set) var catalogPageError: String?
   private(set) var recentServers: [String]
+  /// Tocando pela instância cloud porque o Mac não respondeu (fora de casa).
+  private(set) var isAway = false
 
   private let credentialStore: any CredentialStoring
   private let history: ServerHistory
@@ -42,6 +44,8 @@ final class SessionStore {
   private var didRestore = false
   private var loadedCatalogQuery: CatalogQuery?
   private var titleCache: [Int: TitleDetail] = [:]
+  /// A credencial guardada no Keychain: a do Mac, com a da nuvem dentro.
+  private var storedCredential: SessionCredential?
 
   init(
     credentialStore: any CredentialStoring,
@@ -72,9 +76,12 @@ final class SessionStore {
       signOut(returningTo: credential.serverURL)
       return
     }
+    storedCredential = credential
     do {
-      let user = try await client(for: credential.serverURL).me(token: credential.token)
-      let session = AuthenticatedSession(user: user, credential: credential)
+      let active = await chooseRoute(for: credential)
+      let user = try await client(for: active.serverURL).me(token: active.token)
+      isAway = active.serverURL != credential.serverURL
+      let session = AuthenticatedSession(user: user, credential: active)
       phase = user.mustChangePassword ? .passwordChangeRequired(session) : .authenticated(session)
     } catch let error as APIClientError where error.statusCode == 401 {
       try? credentialStore.clear()
@@ -187,8 +194,11 @@ final class SessionStore {
       else {
         throw APIClientError.invalidPayload
       }
-      let credential = SessionCredential(serverURL: url, token: token, expiresAt: expiration)
+      var credential = SessionCredential(serverURL: url, token: token, expiresAt: expiration)
+      credential.away = await awayCredential(announcedBy: url, username: cleanUsername, now: now)
       try credentialStore.save(credential)
+      storedCredential = credential
+      isAway = false
       password = ""
       let session = AuthenticatedSession(user: response, credential: credential)
       phase =
@@ -494,6 +504,38 @@ final class SessionStore {
     titleCache.removeAll()
   }
 
+  func createRoom(
+    fileID: Int, position: Double, playing: Bool, for session: AuthenticatedSession
+  ) async throws -> RoomState {
+    try await authenticatedContentRequest {
+      try await client(for: session.credential.serverURL).createRoom(
+        fileID: fileID, position: position, playing: playing, token: session.credential.token)
+    }
+  }
+
+  func room(code: String, for session: AuthenticatedSession) async throws -> RoomState {
+    try await authenticatedContentRequest {
+      try await client(for: session.credential.serverURL)
+        .room(code: code, token: session.credential.token)
+    }
+  }
+
+  func sendRoomCommand(
+    _ command: RoomCommand, code: String, for session: AuthenticatedSession
+  ) async throws {
+    try await authenticatedContentRequest {
+      try await client(for: session.credential.serverURL)
+        .sendRoomCommand(command, code: code, token: session.credential.token)
+    }
+  }
+
+  func roomEvents(code: String, for session: AuthenticatedSession) throws
+    -> AsyncThrowingStream<RoomMessage, Error>
+  {
+    try client(for: session.credential.serverURL)
+      .roomEvents(code: code, token: session.credential.token)
+  }
+
   func mediaToken(for session: AuthenticatedSession) async throws -> MediaTokenResponse {
     try await authenticatedContentRequest {
       try await client(for: session.credential.serverURL)
@@ -582,7 +624,12 @@ final class SessionStore {
     if let session {
       try? await client(for: session.credential.serverURL).logout(token: session.credential.token)
     }
+    if let away = storedCredential?.awaySession, away.serverURL != session?.credential.serverURL {
+      try? await client(for: away.serverURL).logout(token: away.token)
+    }
     try? credentialStore.clear()
+    storedCredential = nil
+    isAway = false
     resetContent()
     showServerSelection()
     isLoggingOut = false
@@ -607,6 +654,69 @@ final class SessionStore {
     }
   }
 
+  // MARK: - Rota: Mac em casa, nuvem fora
+
+  /// Quanto esperar pelo Mac antes de ir pela nuvem. Na rede de casa ele
+  /// responde em milissegundos; fora dela, o endereço .local nem resolve.
+  static let homeProbeTimeout: Duration = .milliseconds(2500)
+
+  /// Entra na instância cloud com a senha que acabou de ser digitada, se o
+  /// Mac a anunciar. Falhar aqui não impede o login no Mac.
+  private func awayCredential(announcedBy home: URL, username: String, now: Date) async
+    -> AwayCredential?
+  {
+    guard let announced = try? await client(for: home).health().cloudAddress,
+      let cloudURL = try? ServerAddress.normalize(announced),
+      cloudURL != home,
+      let response = try? await client(for: cloudURL).login(
+        username: username, password: password, remember: true),
+      let token = response.token,
+      let expiration = response.expiraEm.flatMap(Self.parseDate),
+      expiration > now
+    else { return nil }
+    return AwayCredential(serverURL: cloudURL, token: token, expiresAt: expiration)
+  }
+
+  /// O Mac responde? Então é ele; senão a nuvem, se houver sessão lá.
+  private func chooseRoute(for stored: SessionCredential) async -> SessionCredential {
+    guard let away = stored.awaySession else { return stored }
+    return await homeResponds(stored.serverURL) ? stored : away
+  }
+
+  private func homeResponds(_ url: URL) async -> Bool {
+    let api = client(for: url)
+    return await withTaskGroup(of: Bool.self) { group in
+      group.addTask { (try? await api.health()) != nil }
+      group.addTask {
+        try? await Task.sleep(for: Self.homeProbeTimeout)
+        return false
+      }
+      let first = await group.next() ?? false
+      group.cancelAll()
+      return first
+    }
+  }
+
+  /// Ao voltar para o app (saiu de casa, voltou para o Wi-Fi): se a rota
+  /// mudou, troca a sessão ativa e recarrega o conteúdo, cujos IDs são do
+  /// servidor de cada lado.
+  func refreshRoute() async {
+    guard let stored = storedCredential, stored.away != nil,
+      let current = currentSession
+    else { return }
+    let active = await chooseRoute(for: stored)
+    guard active.serverURL != current.credential.serverURL else { return }
+    do {
+      let user = try await client(for: active.serverURL).me(token: active.token)
+      isAway = active.serverURL != stored.serverURL
+      resetContent()
+      let session = AuthenticatedSession(user: user, credential: active)
+      phase = user.mustChangePassword ? .passwordChangeRequired(session) : .authenticated(session)
+    } catch {
+      // A outra ponta também não respondeu: fica onde está.
+    }
+  }
+
   private func client(for url: URL) -> APIClient {
     APIClient(
       baseURL: url,
@@ -617,7 +727,17 @@ final class SessionStore {
 
   private func handleUnauthorizedContentError(_ error: Error) async -> Bool {
     guard let apiError = error as? APIClientError, apiError.statusCode == 401 else { return false }
-    let server = currentSession?.credential.serverURL
+    if isAway, var stored = storedCredential {
+      // Só a sessão da nuvem venceu ou foi revogada: a do Mac continua boa.
+      stored.away = nil
+      try? credentialStore.save(stored)
+      storedCredential = stored
+      isAway = false
+      resetContent()
+      signOut(returningTo: stored.serverURL)
+      return true
+    }
+    let server = storedCredential?.serverURL ?? currentSession?.credential.serverURL
     try? credentialStore.clear()
     resetContent()
     signOut(returningTo: server)

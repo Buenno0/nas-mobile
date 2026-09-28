@@ -12,13 +12,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -43,6 +43,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -198,6 +199,8 @@ fun TvPlayerScreen(
   }
 
   Box(
+    // O único preto puro do app: as barras do vídeo precisam de preto real,
+    // não do sépia do tema, senão a moldura brilha ao redor da imagem.
     Modifier.fillMaxSize().background(Color.Black)
       .focusRequester(playerFocus).focusable()
       .onPreviewKeyEvent { event ->
@@ -234,32 +237,42 @@ fun TvPlayerScreen(
     if (controlsVisible) {
       Column(
         Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-          .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = .72f), Color.Black.copy(alpha = .96f))))
-          .padding(horizontal = 64.dp, vertical = 38.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+          .background(
+            Brush.verticalGradient(
+              listOf(Color.Transparent, Background.copy(alpha = .62f), Background.copy(alpha = .96f))
+            )
+          )
+          .padding(horizontal = OzyTvTokens.gutter, vertical = 30.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
       ) {
-        Text(
-          source.title,
-          color = Color.White,
-          fontSize = 27.sp,
-          fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
-        )
-        LinearProgressIndicator(
-          progress = { if (durationMs > 0) (positionMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f },
-          modifier = Modifier.fillMaxWidth().height(7.dp),
-          color = Accent,
-          trackColor = Color.White.copy(alpha = .25f),
-        )
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-          PlayerButton("−10 s") { runtime?.player?.seekBack() }
-          PlayerButton(if (isPlaying) "Pausar" else "Reproduzir", Modifier.focusRequester(primaryFocus)) {
-            runtime?.player?.let { if (it.isPlaying) it.pause() else it.play() }
-          }
-          PlayerButton("+10 s") { runtime?.player?.seekForward() }
-          Text("${clock(positionMs)} / ${clock(durationMs)}", color = Color.White, modifier = Modifier.padding(horizontal = 8.dp))
+        Text(source.title, color = Ink, style = OzyType.title, maxLines = 1)
+        Spacer(Modifier.height(6.dp))
+        // Barra de posiÃ§Ã£o, nÃ£o controle: quem navega o filme sÃ£o os botÃµes de
+        // Â±10 s. Por isso a cabeÃ§a nÃ£o usa o halo Ã¢mbar, que em todo o resto do
+        // app significa "isto estÃ¡ com o foco".
+        val fraction = if (durationMs > 0) (positionMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f
+        Box(Modifier.fillMaxWidth().height(6.dp).clip(CircleShape).background(Ink.copy(alpha = .18f))) {
+          Box(Modifier.fillMaxWidth(fraction).fillMaxHeight().clip(CircleShape).background(Accent))
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+          Text(clock(positionMs), color = Muted, style = OzyType.caption)
+          Text("−${clock((durationMs - positionMs).coerceAtLeast(0))}", color = Muted, style = OzyType.caption)
+        }
+        Row(
+          Modifier.fillMaxWidth().padding(top = 8.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          OzySecondaryAction("−10 s") { runtime?.player?.seekBack() }
+          OzyPrimaryAction(
+            if (isPlaying) "Pausar" else "Reproduzir",
+            if (isPlaying) OzyGlyph.PAUSE else OzyGlyph.PLAY,
+            Modifier.focusRequester(primaryFocus),
+          ) { runtime?.player?.let { if (it.isPlaying) it.pause() else it.play() } }
+          OzySecondaryAction("+10 s") { runtime?.player?.seekForward() }
           Spacer(Modifier.weight(1f))
           if (source.tracks.audio.isNotEmpty()) {
-            PlayerButton("Áudio: ${source.tracks.audio.getOrNull(audioIndex)?.label ?: "Padrão"}") {
+            OzySecondaryAction("Áudio: ${source.tracks.audio.getOrNull(audioIndex)?.label ?: "Padrão"}") {
               audioIndex = (audioIndex + 1) % source.tracks.audio.size
               persist(runtime?.player)
               changeAudio(source, source.tracks.audio[audioIndex].idx)
@@ -267,7 +280,7 @@ fun TvPlayerScreen(
           }
           if (source.tracks.subtitles.isNotEmpty()) {
             val label = if (subtitleIndex < 0) "Desligada" else source.tracks.subtitles[subtitleIndex].label
-            PlayerButton("Legenda: $label") {
+            OzySecondaryAction("Legenda: $label") {
               subtitleIndex = if (subtitleIndex + 1 >= source.tracks.subtitles.size) -1 else subtitleIndex + 1
               runtime?.player?.let { player ->
                 player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
@@ -277,36 +290,18 @@ fun TvPlayerScreen(
               }
             }
           }
-          PlayerButton("${speeds[speedIndex]}×") {
+          OzySecondaryAction("${speeds[speedIndex]}×") {
             speedIndex = (speedIndex + 1) % speeds.size
             runtime?.player?.setPlaybackSpeed(speeds[speedIndex])
           }
-          if (source.nextFileId != null) PlayerButton("Próximo episódio") {
+          if (source.nextFileId != null) OzySecondaryAction("Próximo episódio") {
             persist(runtime?.player)
             playNext(source)
           }
         }
-        error?.let { Text(it, color = Danger, fontSize = 16.sp) }
+        error?.let { Text(it, color = Danger, style = OzyType.caption) }
       }
     }
-  }
-}
-
-@Composable
-private fun PlayerButton(label: String, modifier: Modifier = Modifier, action: () -> Unit) {
-  var focused by remember { mutableStateOf(false) }
-  Box(
-    modifier.background(if (focused) Color.White else Color.Black.copy(alpha = .48f), RoundedCornerShape(50))
-      .border(1.dp, if (focused) Color.White else Color.White.copy(alpha = .28f), RoundedCornerShape(50))
-      .onFocusChanged { focused = it.isFocused }.ozyClickable(onClick = action)
-      .padding(horizontal = 17.dp, vertical = 11.dp),
-  ) {
-    Text(
-      label,
-      color = if (focused) Color.Black else Color.White,
-      fontSize = 14.sp,
-      fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
-    )
   }
 }
 

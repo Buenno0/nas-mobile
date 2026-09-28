@@ -6,20 +6,20 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.buenno.ozymandias.firetv.data.ApiException
 import com.buenno.ozymandias.firetv.data.Credential
-import com.buenno.ozymandias.firetv.data.CredentialVault
 import com.buenno.ozymandias.firetv.data.DeviceStartResponse
 import com.buenno.ozymandias.firetv.data.HomeResponse
 import com.buenno.ozymandias.firetv.data.MediaFile
-import com.buenno.ozymandias.firetv.data.OzymandiasRepository
+import com.buenno.ozymandias.firetv.data.MediaRepository
 import com.buenno.ozymandias.firetv.data.PlaybackSource
 import com.buenno.ozymandias.firetv.data.PreparationProgress
 import com.buenno.ozymandias.firetv.data.ServerAddress
 import com.buenno.ozymandias.firetv.data.ServerCandidate
-import com.buenno.ozymandias.firetv.data.ServerDiscovery
+import com.buenno.ozymandias.firetv.data.SessionVault
 import com.buenno.ozymandias.firetv.data.TitleCard
 import com.buenno.ozymandias.firetv.data.TitleDetail
 import com.buenno.ozymandias.firetv.data.TitleKind
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -36,6 +36,15 @@ data class BrowseMemory(
   val catalogItem: Int = -1,
   val catalogScroll: Int = 0,
 )
+
+// Nas abas Catálogo e Conta o Back volta para a Início; sair do app só a partir
+// dela. A Fire TV espera que o botão suba um nível, não que encerre a Activity de
+// dentro de uma sub-aba.
+fun AppScreen.allowsBack(): Boolean = when (this) {
+  is AppScreen.Detail, is AppScreen.Login, is AppScreen.Pairing -> true
+  is AppScreen.Main -> tab != MainTab.HOME
+  else -> false
+}
 
 sealed interface AppScreen {
   data object Restoring : AppScreen
@@ -62,13 +71,13 @@ data class AppUiState(
 )
 
 class AppViewModel(
-  private val repository: OzymandiasRepository,
-  private val vault: CredentialVault,
-  discovery: ServerDiscovery,
+  private val repository: MediaRepository,
+  private val vault: SessionVault,
+  discovery: Flow<List<ServerCandidate>>,
 ) : ViewModel() {
   private val _ui = MutableStateFlow(AppUiState())
   val ui: StateFlow<AppUiState> = _ui.asStateFlow()
-  val discoveredServers: StateFlow<List<ServerCandidate>> = discovery.servers()
+  val discoveredServers: StateFlow<List<ServerCandidate>> = discovery
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
   private var pairingJob: Job? = null
   private var lastMainTab = MainTab.HOME
@@ -123,17 +132,19 @@ class AppViewModel(
   private fun pollPairing(server: String, pairing: DeviceStartResponse) {
     pairingJob?.cancel()
     pairingJob = viewModelScope.launch {
-      runCatching { repository.pollPairing(server, pairing.deviceCode, pairing.interval) }
-        .onSuccess { user -> finishAuthentication(server, user.token, user.expiresAt, user.username) }
-        .onFailure { _ui.value = _ui.value.copy(error = it.message) }
+      runCatching {
+        val user = repository.pollPairing(server, pairing.deviceCode, pairing.interval, pairing.expiresIn)
+        finishAuthentication(server, user.token, user.expiresAt, user.username)
+      }.onFailure { _ui.value = _ui.value.copy(loading = false, error = it.message) }
     }
   }
 
   fun login(server: String, username: String, password: String) = viewModelScope.launch {
     busy()
-    runCatching { repository.login(server, username.trim(), password) }
-      .onSuccess { finishAuthentication(server, it.token, it.expiresAt, it.username) }
-      .onFailure { _ui.value = _ui.value.copy(loading = false, error = it.message) }
+    runCatching {
+      val user = repository.login(server, username.trim(), password)
+      finishAuthentication(server, user.token, user.expiresAt, user.username)
+    }.onFailure { _ui.value = _ui.value.copy(loading = false, error = it.message) }
   }
 
   private suspend fun finishAuthentication(server: String, token: String?, expiresAt: String?, username: String) {
@@ -269,10 +280,12 @@ class AppViewModel(
   }
 
   fun back() {
-    _ui.value = when (_ui.value.screen) {
-      is AppScreen.Detail -> _ui.value.copy(screen = AppScreen.Main(lastMainTab))
-      is AppScreen.Login, is AppScreen.Pairing -> _ui.value.copy(screen = AppScreen.Servers, error = null)
-      else -> _ui.value
+    when (val screen = _ui.value.screen) {
+      is AppScreen.Detail -> _ui.value = _ui.value.copy(screen = AppScreen.Main(lastMainTab))
+      is AppScreen.Login, is AppScreen.Pairing ->
+        _ui.value = _ui.value.copy(screen = AppScreen.Servers, error = null)
+      is AppScreen.Main -> if (screen.tab != MainTab.HOME) selectTab(MainTab.HOME)
+      else -> Unit
     }
   }
 
@@ -302,6 +315,6 @@ class AppViewModel(
   class Factory(private val app: OzymandiasApplication) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T =
-      AppViewModel(app.repository, app.vault, app.discovery) as T
+      AppViewModel(app.repository, app.vault, app.discovery.servers()) as T
   }
 }

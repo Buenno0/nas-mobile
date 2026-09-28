@@ -17,32 +17,32 @@ import kotlinx.serialization.json.Json
 
 private val Context.ozymandiasData by preferencesDataStore("ozymandias_tv")
 
-class CredentialVault(private val context: Context) {
+class CredentialVault(private val context: Context) : SessionVault {
   private val json = Json { ignoreUnknownKeys = true }
   private val credentialKey = stringPreferencesKey("credential")
   private val recentKey = stringPreferencesKey("recent_servers")
 
-  suspend fun save(credential: Credential) {
+  override suspend fun save(credential: Credential) {
     val encoded = json.encodeToString(Credential.serializer(), credential)
     context.ozymandiasData.edit { it[credentialKey] = encrypt(encoded) }
     rememberServer(credential.serverUrl)
   }
 
-  suspend fun load(): Credential? {
+  override suspend fun load(): Credential? {
     val value = context.ozymandiasData.data.first()[credentialKey] ?: return null
     return runCatching { json.decodeFromString<Credential>(decrypt(value)) }.getOrNull()
   }
 
-  suspend fun clear() {
+  override suspend fun clear() {
     context.ozymandiasData.edit { it.remove(credentialKey) }
   }
 
-  suspend fun recentServers(): List<String> {
+  override suspend fun recentServers(): List<String> {
     val raw = context.ozymandiasData.data.first()[recentKey] ?: return emptyList()
     return runCatching { json.decodeFromString<List<String>>(raw) }.getOrDefault(emptyList())
   }
 
-  suspend fun rememberServer(server: String) {
+  override suspend fun rememberServer(server: String) {
     val updated = (listOf(server) + recentServers().filterNot { it == server }).take(3)
     context.ozymandiasData.edit { it[recentKey] = json.encodeToString(updated) }
   }

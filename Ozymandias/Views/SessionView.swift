@@ -5,8 +5,12 @@ struct SessionView: View {
   let session: AuthenticatedSession
   let requiresPasswordChange: Bool
 
+  @Environment(PlaybackController.self) private var playback
+  @State private var codigoDoLink: CodigoDeSala?
+
   var body: some View {
-    TabView {
+    @Bindable var playback = playback
+    return TabView {
       Tab("Início", systemImage: "house.fill") {
         NavigationStack {
           HomeView(store: store, session: session)
@@ -44,7 +48,122 @@ struct SessionView: View {
       }
       .accessibilityIdentifier("profileTab")
     }
+    // O acessório é o mecanismo do iOS 26 para isto: fica acima da tab bar sem
+    // roubar a área de toque dela, e acompanha a minimização ao rolar.
+    .tabViewBottomAccessory {
+      // A sobrecarga com `isEnabled:` só existe no iOS 26.1; o alvo é 26.0.
+      if playback.hasItem { MiniPlayerBar(playback: playback) }
+    }
+    .tabBarMinimizeBehavior(.onScrollDown)
+    .fullScreenCover(isPresented: $playback.isPresentingFullScreen) {
+      PlayerView(playback: playback)
+    }
+    // ozymandias://sala/CÓDIGO: o convite abre o app direto na sala.
+    .onOpenURL { url in
+      guard url.scheme == "ozymandias", url.host() == "sala" else { return }
+      let codigo = url.lastPathComponent.uppercased()
+      guard codigo.count == 6 else { return }
+      codigoDoLink = CodigoDeSala(id: codigo)
+    }
+    .sheet(item: $codigoDoLink) { codigo in
+      EntrarNaSalaSheet(store: store, session: session, codigoInicial: codigo.id)
+        .presentationDetents([.height(340)])
+    }
+    .alert(
+      "A sala foi encerrada",
+      isPresented: Binding(
+        get: { playback.sala.encerradaPor != nil },
+        set: { if !$0 { playback.sala.encerradaPor = nil } })
+    ) {
+      Button("Continuar sozinho") { playback.sala.encerradaPor = nil }
+    } message: {
+      Text("\(playback.sala.encerradaPor ?? "") encerrou a sessão. Você pode continuar assistindo sozinho.")
+    }
     .accessibilityIdentifier("authenticatedApp")
+  }
+}
+
+/// A barra que prova que a reprodução sobreviveu ao fechamento do player.
+private struct MiniPlayerBar: View {
+  let playback: PlaybackController
+
+  var body: some View {
+    HStack(spacing: 12) {
+      artwork
+
+      VStack(alignment: .leading, spacing: 1) {
+        Text(playback.currentTitle)
+          .font(.subheadline.weight(.semibold))
+          .lineLimit(1)
+        Text(subtitle)
+          .font(.caption)
+          .foregroundStyle(Color.ozMuted)
+          .lineLimit(1)
+      }
+      .frame(maxWidth: .infinity, alignment: .leading)
+      .contentShape(.rect)
+      .onTapGesture { playback.presentFullScreen() }
+
+      Button(action: playback.togglePlayback) {
+        Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
+          .font(.system(size: 15, weight: .bold))
+          .frame(width: 32, height: 32)
+          .contentShape(.rect)
+      }
+      .buttonStyle(.plain)
+      .accessibilityLabel(playback.isPlaying ? "Pausar" : "Reproduzir")
+      .accessibilityIdentifier("miniPlayerPlayPauseButton")
+
+      Button {
+        Task { await playback.stop() }
+      } label: {
+        Image(systemName: "xmark")
+          .font(.system(size: 13, weight: .bold))
+          .frame(width: 32, height: 32)
+          .contentShape(.rect)
+      }
+      .buttonStyle(.plain)
+      .accessibilityLabel("Encerrar reprodução")
+      .accessibilityIdentifier("miniPlayerCloseButton")
+    }
+    .padding(.horizontal, 12)
+    .foregroundStyle(Color.ozInk)
+    .accessibilityElement(children: .contain)
+    .accessibilityIdentifier("miniPlayerBar")
+  }
+
+  private var artwork: some View {
+    RoundedRectangle(cornerRadius: 6)
+      .fill(
+        LinearGradient(
+          colors: [Color.ozElevated, Color.ozAccent.opacity(0.48)],
+          startPoint: .topLeading,
+          endPoint: .bottomTrailing
+        )
+      )
+      .frame(width: 32, height: 32)
+      .overlay {
+        if let image = playback.artwork {
+          Image(uiImage: image).resizable().scaledToFill()
+        } else {
+          Image(systemName: "music.note")
+            .font(.caption2.weight(.bold))
+            .foregroundStyle(Color.ozInk.opacity(0.7))
+        }
+      }
+      .clipShape(.rect(cornerRadius: 6))
+      .accessibilityHidden(true)
+  }
+
+  /// O rótulo do episódio, e "Preparando" enquanto o servidor transcodifica —
+  /// senão a barra mostraria um play que não faz nada.
+  private var subtitle: String {
+    switch playback.phase {
+    case .preparing(let progress, _): "Preparando · \(progress.percentage)%"
+    case .loading, .idle: "Carregando…"
+    case .failed: "Não foi possível reproduzir"
+    case .ready: playback.episodeLabel
+    }
   }
 }
 
@@ -103,9 +222,10 @@ private struct ProfileView: View {
             icon: "person.badge.key")
           Divider().overlay(Color.ozLine)
           detailRow(
-            "Servidor",
+            store.isAway ? "Servidor · pela nuvem" : "Servidor",
             value: session.credential.serverURL.host()
-              ?? session.credential.serverURL.absoluteString, icon: "server.rack")
+              ?? session.credential.serverURL.absoluteString,
+            icon: store.isAway ? "cloud" : "server.rack")
           Divider().overlay(Color.ozLine)
           detailRow(
             "Sessão válida até",
@@ -238,4 +358,8 @@ private struct ProfileView: View {
     }
     .padding(.vertical, 12)
   }
+}
+
+private struct CodigoDeSala: Identifiable {
+  let id: String
 }

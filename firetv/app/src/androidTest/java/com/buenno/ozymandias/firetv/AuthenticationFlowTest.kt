@@ -54,8 +54,8 @@ class AuthenticationFlowTest {
     compose.onNodeWithText("URL do servidor").performTextInput(server.url("/").toString())
     compose.onNodeWithText("Conectar").performClick()
     compose.waitUntil(5_000) { compose.onAllNodesWithText("ABCD-EFGH").fetchSemanticsNodes().isNotEmpty() }
-    compose.onNodeWithText("Conecte pelo celular").assertIsDisplayed()
-    compose.onNodeWithText("Usar usuário e senha").performClick()
+    compose.onNodeWithText("Autorize pelo iPhone").assertIsDisplayed()
+    compose.onNodeWithText("Usuário e senha").performClick()
     compose.onNodeWithText("Usuário").performTextInput("bueno")
     compose.onNodeWithText("Senha").performTextInput("12345678")
     compose.onNodeWithText("Entrar").performClick()

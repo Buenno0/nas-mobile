@@ -26,6 +26,11 @@ struct HomeView: View {
     .background(Color.ozBackground)
     // O banner precisa chegar ao topo; a barra de navegação daria um degrau.
     .toolbar(.hidden, for: .navigationBar)
+    .overlay(alignment: .topTrailing) {
+      EntrarNaSalaBotao(store: store, session: session)
+        .padding(.trailing, 16)
+        .padding(.top, 4)
+    }
     .task { await store.loadHome(for: session) }
     .accessibilityIdentifier("homeScreen")
   }
@@ -280,7 +285,7 @@ private struct TitleHeroBanner: View {
   @Bindable var store: SessionStore
   let session: AuthenticatedSession
 
-  @State private var selectedFile: MediaFileInfo?
+  @Environment(PlaybackController.self) private var playback
   @State private var isStartingPlayback = false
   @State private var playbackError: String?
 
@@ -338,9 +343,6 @@ private struct TitleHeroBanner: View {
       .animation(.snappy(duration: 0.25), value: playbackError)
       .animation(.snappy(duration: 0.25), value: isStartingPlayback)
     }
-    .fullScreenCover(item: $selectedFile) { file in
-      PlayerView(file: file, title: title.name, store: store, session: session)
-    }
   }
 
   /// `FILME · 2026 · 2 h 17 min`, como a Apple faz — em vez de uma pílula.
@@ -367,7 +369,14 @@ private struct TitleHeroBanner: View {
         playbackError = "Este título ainda não tem arquivo para reproduzir."
         return
       }
-      selectedFile = file
+      playback.start(
+        file: file,
+        title: title.name,
+        queue: PlaybackQueueBuilder.queue(for: detail, startingAt: file),
+        artworkPath: title.poster ?? title.backdrop,
+        store: store,
+        session: session
+      )
     } catch {
       if case .signedOut = store.phase { return }
       playbackError = error.localizedDescription
@@ -503,8 +512,8 @@ struct TitleDetailView: View {
   @State private var state: Loadable<TitleDetail> = .idle
   @State private var favorite = false
   @State private var isChangingFavorite = false
+  @Environment(PlaybackController.self) private var playback
   @State private var actionError: String?
-  @State private var selectedFile: MediaFileInfo?
   @State private var showingCollections = false
   @State private var matchDetail: TitleDetail?
   @State private var heroScrollOffset: CGFloat = 0
@@ -524,9 +533,6 @@ struct TitleDetailView: View {
     .background(Color.ozBackground)
     .navigationBarTitleDisplayMode(.inline)
     .task { await load() }
-    .fullScreenCover(item: $selectedFile) { file in
-      PlayerView(file: file, title: loadedTitle, store: store, session: session)
-    }
     .sheet(isPresented: $showingCollections) {
       CollectionMembershipView(titleID: titleID, store: store, session: session)
     }
@@ -590,7 +596,7 @@ struct TitleDetailView: View {
         HeroActionRow {
           if let playable = detail.preferredPlayableFile {
             HeroPlayButton(title: playLabel(playable)) {
-              selectedFile = playable
+              play(playable, in: detail)
             }
             .accessibilityIdentifier("primaryPlayButton")
           }
@@ -745,7 +751,7 @@ struct TitleDetailView: View {
               MediaFileRow(
                 file: episode,
                 kind: detail.kind,
-                action: { selectedFile = episode },
+                action: { play(episode, in: detail) },
                 setWatched: { watched in
                   Task { await changeWatched(watched, file: episode) }
                 }
@@ -773,7 +779,7 @@ struct TitleDetailView: View {
             MediaFileRow(
               file: file,
               kind: detail.kind,
-              action: { if file.mediaType != .photo { selectedFile = file } },
+              action: { if file.mediaType != .photo { play(file, in: detail) } },
               setWatched: { watched in
                 Task { await changeWatched(watched, file: file) }
               }
@@ -905,6 +911,19 @@ struct TitleDetailView: View {
     case .photos: "Fotos"
     default: "Arquivos"
     }
+  }
+
+  /// Tocar uma faixa de dentro de um álbum enfileira o álbum; vídeo continua
+  /// a cargo do `next` do servidor.
+  private func play(_ file: MediaFileInfo, in detail: TitleDetail) {
+    playback.start(
+      file: file,
+      title: detail.name,
+      queue: PlaybackQueueBuilder.queue(for: detail, startingAt: file),
+      artworkPath: file.poster ?? detail.posterURL,
+      store: store,
+      session: session
+    )
   }
 
   private var loadedTitle: String {

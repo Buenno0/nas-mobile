@@ -417,6 +417,91 @@ struct SessionStoreTests {
     return try JSONDecoder().decode(MediaFileInfo.self, from: Data(json.utf8))
   }
 
+  // MARK: - Rota: Mac em casa, nuvem fora
+
+  @Test func loginAlsoOpensTheCloudSessionTheMacAnnounces() async throws {
+    let credentials = MemoryCredentialStore()
+    let store = makeStore(credentials: credentials) { request in
+      let host = request.url?.host() ?? ""
+      if request.url?.path == "/healthz" {
+        return APIClientTests.response(
+          for: request, status: 200,
+          json: #"{"status":"ok","time":"now","papel":"mac","endereco_nuvem":"https://ozymandias.exemplo.ts.net"}"#)
+      }
+      let token = host.hasSuffix("ts.net") ? "token-nuvem" : "token-mac"
+      return APIClientTests.response(
+        for: request, status: 200,
+        json: #"{"username":"ana","must_change_password":false,"is_admin":true,"token":"\#(token)","expira_em":"2099-08-28T12:00:00Z"}"#)
+    }
+    store.phase = .signedOut
+    await store.validateServer()
+    store.username = "ana"
+    store.password = "password"
+    await store.login(now: Date(timeIntervalSince1970: 2_000_000_000))
+    let saved = try credentials.load()
+    #expect(saved?.token == "token-mac")
+    #expect(saved?.away?.token == "token-nuvem")
+    #expect(saved?.away?.serverURL.host() == "ozymandias.exemplo.ts.net")
+    #expect(store.isAway == false)
+  }
+
+  @Test func restoreGoesThroughTheCloudWhenTheMacDoesNotAnswer() async throws {
+    var credential = SessionCredential(
+      serverURL: URL(string: "http://localhost:8787")!,
+      token: "token-mac",
+      expiresAt: Date(timeIntervalSince1970: 4_000_000_000)
+    )
+    credential.away = AwayCredential(
+      serverURL: URL(string: "https://ozymandias.exemplo.ts.net")!,
+      token: "token-nuvem",
+      expiresAt: Date(timeIntervalSince1970: 4_000_000_000)
+    )
+    let credentials = MemoryCredentialStore(credential: credential)
+    let store = makeStore(credentials: credentials) { request in
+      guard request.url?.host()?.hasSuffix("ts.net") == true else {
+        throw URLError(.cannotConnectToHost)  // fora de casa: o Mac não responde
+      }
+      return APIClientTests.response(
+        for: request, status: 200,
+        json: #"{"username":"ana","must_change_password":false,"is_admin":true}"#)
+    }
+    await store.restoreIfNeeded(now: Date(timeIntervalSince1970: 2_000_000_000))
+    guard case .authenticated(let session) = store.phase else {
+      Issue.record("A sessão deveria ter sido restaurada pela nuvem")
+      return
+    }
+    #expect(session.credential.token == "token-nuvem")
+    #expect(store.isAway)
+  }
+
+  @Test func restoreStaysOnTheMacWhenItAnswers() async throws {
+    var credential = SessionCredential(
+      serverURL: URL(string: "http://localhost:8787")!,
+      token: "token-mac",
+      expiresAt: Date(timeIntervalSince1970: 4_000_000_000)
+    )
+    credential.away = AwayCredential(
+      serverURL: URL(string: "https://ozymandias.exemplo.ts.net")!,
+      token: "token-nuvem",
+      expiresAt: Date(timeIntervalSince1970: 4_000_000_000)
+    )
+    let store = makeStore(credentials: MemoryCredentialStore(credential: credential)) { request in
+      if request.url?.path == "/healthz" {
+        return APIClientTests.response(for: request, status: 200, json: #"{"status":"ok","time":"now"}"#)
+      }
+      return APIClientTests.response(
+        for: request, status: 200,
+        json: #"{"username":"ana","must_change_password":false,"is_admin":true}"#)
+    }
+    await store.restoreIfNeeded(now: Date(timeIntervalSince1970: 2_000_000_000))
+    guard case .authenticated(let session) = store.phase else {
+      Issue.record("A sessão deveria ter sido restaurada")
+      return
+    }
+    #expect(session.credential.token == "token-mac")
+    #expect(!store.isAway)
+  }
+
   private func makeStore(
     credentials: MemoryCredentialStore,
     handler: @escaping @Sendable (URLRequest) async throws -> (Data, URLResponse)

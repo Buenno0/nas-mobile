@@ -92,19 +92,12 @@ struct ArtistsView: View {
   }
 }
 
-private struct QueueSelection: Identifiable {
-  let file: MediaFileInfo
-  let queue: [MediaFileInfo]
-  let artist: String
-  var id: Int { file.id }
-}
-
 struct ArtistDetailView: View {
   let name: String
   @Bindable var store: SessionStore
   let session: AuthenticatedSession
+  @Environment(PlaybackController.self) private var playback
   @State private var state: Loadable<ArtistDetail> = .idle
-  @State private var selection: QueueSelection?
 
   private let albumColumns = [GridItem(.adaptive(minimum: 108, maximum: 160), spacing: 16, alignment: .top)]
 
@@ -123,15 +116,6 @@ struct ArtistDetailView: View {
     .navigationTitle(name)
     .navigationBarTitleDisplayMode(.inline)
     .task { await load() }
-    .fullScreenCover(item: $selection) { selection in
-      PlayerView(
-        file: selection.file,
-        title: selection.artist,
-        queue: selection.queue,
-        store: store,
-        session: session
-      )
-    }
   }
 
   private func artistContent(_ artist: ArtistDetail) -> some View {
@@ -225,7 +209,15 @@ struct ArtistDetailView: View {
 
   private func play(_ queue: [MediaFileInfo], from index: Int, artist: String) {
     guard queue.indices.contains(index) else { return }
-    selection = QueueSelection(file: queue[index], queue: queue, artist: artist)
+    let file = queue[index]
+    playback.start(
+      file: file,
+      title: artist,
+      queue: queue,
+      artworkPath: file.poster,
+      store: store,
+      session: session
+    )
   }
 
   private func load() async {

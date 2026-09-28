@@ -39,11 +39,19 @@ object ServerAddress {
   }
 }
 
+// Um cliente por processo. Cada OkHttpClient carrega o próprio pool de conexões
+// e o próprio dispatcher; construir um por requisição faria a TV reabrir a
+// conexão (e o handshake TLS) a cada chamada de catálogo.
+internal object Http {
+  val client: OkHttpClient = OkHttpClient.Builder().retryOnConnectionFailure(true).build()
+  val json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+}
+
 class ApiClient(
   val baseUrl: String,
-  private val http: OkHttpClient = OkHttpClient.Builder().retryOnConnectionFailure(true).build(),
+  private val http: OkHttpClient = Http.client,
 ) {
-  @PublishedApi internal val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+  @PublishedApi internal val json = Http.json
   private val mediaType = "application/json; charset=utf-8".toMediaType()
 
   suspend inline fun <reified T> get(path: String, token: String? = null): T =

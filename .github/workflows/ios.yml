@@ -1,0 +1,38 @@
+name: iOS
+
+# Desligado de propósito. O app exige Xcode 27 beta (deployment target iOS 26,
+# Swift 6) e os runners macOS hospedados só trazem versões estáveis, então este
+# workflow falharia em toda execução. Duas formas de ligá-lo:
+#
+#   1. Registrar um self-hosted runner no Mac que já tem o Xcode beta e trocar
+#      `runs-on` por `[self-hosted, macOS]`.
+#   2. Esperar o Xcode 27 estável chegar aos runners e trocar `if: false` por
+#      um `xcode-version` fixado na ação de setup.
+#
+# Até então, rode localmente:
+#   DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcodebuild test \
+#     -project Ozymandias.xcodeproj -scheme Ozymandias \
+#     -destination 'platform=iOS Simulator,name=iPhone 17' -derivedDataPath /tmp/ozy-dd
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    if: false
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      # O derivedDataPath fora do repositório é obrigatório: a pasta é
+      # sincronizada e os bundles herdam com.apple.FinderInfo, o que faz o
+      # codesign falhar com "resource fork, Finder information, or similar
+      # detritus not allowed".
+      - name: Testes unitários
+        run: |
+          xcodebuild test \
+            -project Ozymandias.xcodeproj \
+            -scheme Ozymandias \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -derivedDataPath "$RUNNER_TEMP/ozymandias-dd" \
+            -only-testing:OzymandiasTests
